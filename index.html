@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#611232">
 <title>Inventario de Bienes · SPLAN</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
 <style>
 :root{
   --negro:#161a1d; --guinda:#9b2247; --guinda-osc:#611232;
@@ -62,12 +62,16 @@ input[readonly]{background:#f1ede7; color:var(--verde-osc); font-weight:700;}
 .btn-g{background:#eceae5; color:var(--negro);}
 .btn:disabled{opacity:.45;}
 
-/* ---------- Escáner ---------- */
-#lector{border-radius:14px; overflow:hidden; border:3px solid var(--verde-osc);
-  background:var(--negro); min-height:120px;}
-#lector video{display:block;}
+/* ---------- Visor de cámara ---------- */
+.visor{position:relative; border-radius:14px; overflow:hidden;
+  border:3px solid var(--verde-osc); background:var(--negro); min-height:120px;}
+.visor video{display:block; width:100%;}
+.scan-ctrl{display:flex; gap:10px; margin-top:10px;}
+.mini{flex:1; padding:11px 8px; border:2px solid var(--verde-osc); border-radius:10px;
+  background:var(--blanco); color:var(--verde-osc); font-size:14px; font-weight:800; cursor:pointer;}
+.mini.act{background:var(--verde-osc); color:var(--blanco);}
 
-/* ---------- Flash de resultado (elemento firma) ---------- */
+/* ---------- Flash de resultado ---------- */
 #flash{position:fixed; inset:0; z-index:200; display:none; flex-direction:column;
   align-items:center; justify-content:center; text-align:center; padding:32px;
   color:var(--blanco); animation:pop .18s ease-out;}
@@ -78,7 +82,9 @@ input[readonly]{background:#f1ede7; color:var(--verde-osc); font-weight:700;}
 #flash .titulo{font-size:26px; font-weight:900; text-transform:uppercase;
   letter-spacing:.08em; margin:12px 0 6px;}
 #flash .detalle{font-size:16px; opacity:.92; max-width:340px;}
-#flash .cerrar{margin-top:28px; padding:12px 36px; border:2px solid rgba(255,255,255,.7);
+#flash .accion{margin-top:26px; padding:14px 30px; border:0; border-radius:30px;
+  background:var(--blanco); color:var(--verde-osc); font-size:15px; font-weight:800;}
+#flash .cerrar{margin-top:14px; padding:12px 36px; border:2px solid rgba(255,255,255,.7);
   border-radius:30px; background:none; color:var(--blanco); font-size:14px; font-weight:700;}
 @keyframes pop{from{opacity:0; transform:scale(1.04);} to{opacity:1; transform:scale(1);}}
 
@@ -103,13 +109,17 @@ td.num{text-align:right; font-variant-numeric:tabular-nums; font-weight:700;}
 .login-wrap .escudo .eyebrow{font-size:10px; letter-spacing:.24em; text-transform:uppercase;
   color:var(--dorado); font-weight:700;}
 .login-wrap .escudo h1{font-size:24px; font-weight:900; color:var(--guinda-osc); margin-top:4px;}
+.ficha{margin-top:10px; padding:12px; border-radius:10px; background:#f1ede7;
+  font-size:14px; line-height:1.55;}
+.ficha b{color:var(--verde-osc);}
+#bannerCat,#bannerSq{margin-top:8px; padding:10px 12px; border-radius:10px;
+  font-size:13px; font-weight:600; background:var(--dorado-cl); color:var(--verde-osc);}
 </style>
 </head>
 <body>
 
 <!-- ============ CONFIGURACIÓN ============ -->
 <script>
-// ⚙️ PEGA AQUÍ tus credenciales de Supabase (Dashboard > Settings > API)
 const SUPABASE_URL = "https://xuwtkpowdfjzdizdovud.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1d3RrcG93ZGZqemRpemRvdnVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMzg1ODEsImV4cCI6MjA5OTcxNDU4MX0.qRj3cJ7xqgmtCibnBUJhLp8fkxdP62zQO-7NcDlj1MI";
 </script>
@@ -152,53 +162,76 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 </header>
 
 <main>
-  <!-- ---- PESTAÑA: ALTA ---- -->
-  <section id="tabAlta">
+  <!-- ---- PESTAÑA: ESCANEAR (todo en uno) ---- -->
+  <section id="tabScan">
     <div class="card">
-      <h2>Registrar bien</h2>
-      <div id="lector"></div>
-      <button id="btnScanAlta" class="btn btn-v" onclick="escanear('alta')">📷 Escanear etiqueta QR</button>
-      <button class="btn btn-o" onclick="altaSinQR()">Sin QR legible · captura manual</button>
+      <h2>Escanear etiquetas</h2>
+      <label>Campaña de verificación</label>
+      <select id="selCampania"></select>
+      <div id="visor" class="visor oculto"><video id="vid" playsinline muted></video></div>
+      <div id="scanCtrl" class="scan-ctrl oculto">
+        <button id="btnTorch" class="mini oculto" onclick="toggleTorch()">🔦 Linterna</button>
+        <button id="btnZoom" class="mini oculto" onclick="cicloZoom()">🔍 Zoom 1×</button>
+      </div>
+      <button id="btnScan" class="btn btn-v" onclick="iniciarEscaneo()">📷 Iniciar escaneo</button>
+      <button id="btnStop" class="btn btn-g oculto" onclick="detenerEscaneo()">⏹ Detener</button>
+      <button class="btn btn-o" onclick="el('qrFotoInput').click()">🖼 El QR no enfoca · leerlo de una foto</button>
+      <p class="aviso">Apunta al código QR de la etiqueta. La app decide sola: si el bien
+        ya está ligado, lo <b>verifica</b>; si el QR es nuevo, te pide el número visible
+        para <b>ligarlo y verificarlo</b> en un solo paso. Si la imagen se ve borrosa,
+        prueba el zoom, la linterna o el botón de leerlo de una foto.</p>
     </div>
-    <div id="formAlta" class="card oculto">
-      <h2>Datos del bien</h2>
-      <label>Código QR (llave interna)</label>
-      <input id="fQr" readonly placeholder="— sin QR —">
-      <label>ID de inventario (número visible en etiqueta)</label>
+
+    <!-- Tarjeta de vinculación: aparece cuando el QR escaneado es nuevo -->
+    <div id="cardVinc" class="card oculto">
+      <h2>Etiqueta nueva · ligar al catálogo</h2>
+      <label>Código QR leído</label>
+      <input id="fQr" readonly>
+      <label>Número visible en la etiqueta (ID)</label>
       <input id="fId" inputmode="numeric" placeholder="ej. 115106" onchange="buscarCatalogo()">
-      <div id="bannerCat" class="oculto" style="margin-top:8px;padding:10px 12px;border-radius:10px;
-        font-size:13px;font-weight:600;background:var(--dorado-cl);color:var(--verde-osc)"></div>
-      <label>Descripción</label>
-      <input id="fDesc" placeholder="ej. ESCRITORIO EJECUTIVO STILA">
-      <label>Área</label>
-      <select id="fArea"></select>
-      <label>Ubicación física</label>
-      <input id="fUbi" placeholder="ej. Oficina 204, edificio SAFIN">
-      <label>Foto de evidencia (opcional)</label>
+      <div id="bannerCat" class="oculto"></div>
+      <div id="formNuevo" class="oculto">
+        <label>Descripción</label>
+        <input id="fDesc" placeholder="ej. ESCRITORIO EJECUTIVO STILA">
+        <label>Área</label>
+        <select id="fArea"></select>
+        <label>Ubicación física</label>
+        <input id="fUbi" placeholder="ej. Oficina 204, edificio SAFIN">
+      </div>
+      <label>Foto del bien (evidencia, opcional aquí — también puedes tomarla al verificar)</label>
       <input id="fFoto" type="file" accept="image/*" capture="environment" onchange="previsualizar(this)">
       <img id="fotoPrev" class="foto-prev oculto">
-      <button id="btnGuardar" class="btn btn-p" onclick="guardarBien()">Guardar bien</button>
-      <button class="btn btn-g" onclick="cancelarAlta()">Cancelar</button>
+      <button id="btnVinc" class="btn btn-p" onclick="guardarVinculacion()">Ligar y verificar</button>
+      <button class="btn btn-g" onclick="cancelarVinc(true)">Cancelar</button>
     </div>
   </section>
 
-  <!-- ---- PESTAÑA: VERIFICAR ---- -->
-  <section id="tabVerif" class="oculto">
+  <!-- ---- PESTAÑA: SIN QR ---- -->
+  <section id="tabSinqr" class="oculto">
     <div class="card">
-      <h2>Verificación física</h2>
-      <label>Campaña activa</label>
-      <select id="selCampania"></select>
-      <div id="lectorV" style="margin-top:12px"></div>
-      <button id="btnScanVerif" class="btn btn-v" onclick="escanear('verif')">📷 Iniciar escaneo continuo</button>
-      <button id="btnStopVerif" class="btn btn-g oculto" onclick="detenerEscaner()">⏹ Detener</button>
-      <label style="margin-top:18px">O verificar por ID de inventario</label>
-      <input id="verifManual" inputmode="numeric" placeholder="ej. 115106">
-      <button class="btn btn-o" onclick="verificarManual()">Verificar por ID</button>
+      <h2>Sin QR legible · por número</h2>
+      <p class="aviso" style="margin-top:0">Para etiquetas rotas, despegadas o cuyo QR
+        no se pudo leer de ninguna forma.</p>
+      <label>Número visible en la etiqueta (ID)</label>
+      <input id="sqId" inputmode="numeric" placeholder="ej. 115106">
+      <button class="btn btn-v" onclick="buscarSinQR()">Buscar bien</button>
+      <div id="bannerSq" class="oculto"></div>
+      <div id="fichaSq" class="ficha oculto"></div>
+      <button id="btnVerifSq" class="btn btn-p oculto" onclick="verificarSinQR()">✓ Verificar este bien</button>
+      <div id="formSqNuevo" class="oculto">
+        <label>Descripción</label>
+        <input id="sqDesc" placeholder="Descripción del bien">
+        <label>Área</label>
+        <select id="sqArea"></select>
+        <label>Ubicación física</label>
+        <input id="sqUbi" placeholder="ej. Oficina 204">
+        <button class="btn btn-p" onclick="registrarSinQR()">Registrar como nuevo y verificar</button>
+      </div>
     </div>
   </section>
 
-  <!-- ---- PESTAÑA: RESUMEN ---- -->
-  <section id="tabResumen" class="oculto">
+  <!-- ---- PESTAÑA: AVANCE ---- -->
+  <section id="tabAvance" class="oculto">
     <div class="card">
       <h2>Avance por área</h2>
       <div id="resumenTabla" class="aviso">Cargando…</div>
@@ -212,9 +245,9 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 </main>
 
 <nav>
-  <button id="nAlta" class="on" onclick="irTab('Alta')"><span class="ic">➕</span>Alta</button>
-  <button id="nVerif" onclick="irTab('Verif')"><span class="ic">✅</span>Verificar</button>
-  <button id="nResumen" onclick="irTab('Resumen')"><span class="ic">📊</span>Resumen</button>
+  <button id="nScan" class="on" onclick="irTab('Scan')"><span class="ic">📷</span>Escanear</button>
+  <button id="nSinqr" onclick="irTab('Sinqr')"><span class="ic">⌨️</span>Sin QR</button>
+  <button id="nAvance" onclick="irTab('Avance')"><span class="ic">📊</span>Avance</button>
 </nav>
 </div>
 
@@ -223,14 +256,22 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   <div class="simbolo" id="flashSim">✓</div>
   <div class="titulo" id="flashTit">Verificado</div>
   <div class="detalle" id="flashDet"></div>
+  <button id="flashFoto" class="accion oculto" onclick="tomarEvidencia()">📸 Tomar foto de evidencia</button>
   <button class="cerrar" onclick="cerrarFlash()">Continuar</button>
 </div>
 <div id="toast"></div>
 
+<!-- Entradas de archivo ocultas -->
+<input id="qrFotoInput" type="file" accept="image/*" capture="environment" class="oculto" onchange="leerQRdeFoto(this)">
+<input id="evidInput" type="file" accept="image/*" capture="environment" class="oculto" onchange="subirEvidencia(this)">
+
 <script>
 /* ================= ESTADO ================= */
-let sb=null, usuario=null, perfil=null, areas=[], scanner=null, modoScan=null;
-let ultimoQR="", ultimoQRts=0;
+let sb=null, usuario=null, perfil=null, areas=[], qrs=null, escaneando=false;
+let ultimoQR="", ultimoQRts=0, zoomTrack=null, zoomNivel=1, torchOn=false;
+let vincularBienId=null;     // uuid del bien del catálogo al que se ligará el QR
+let pendVerifId=null;        // id de la verificación a la que se adjuntará la foto
+let pendVerifDesc="";
 
 /* ================= ARRANQUE ================= */
 window.addEventListener('load', async ()=>{
@@ -257,7 +298,7 @@ async function cerrarSesion(){ await sb.auth.signOut(); location.reload(); }
 async function postLogin(){
   const {data:a}=await sb.from('areas').select('*').order('nombre');
   areas=a||[];
-  llenarAreas('perfilArea'); llenarAreas('fArea');
+  llenarAreas('perfilArea'); llenarAreas('fArea'); llenarAreas('sqArea');
   const {data:p}=await sb.from('perfiles').select('*').eq('id',usuario.id).maybeSingle();
   if(!p){ mostrar('vPerfil'); return; }
   perfil=p; arrancarApp();
@@ -275,7 +316,7 @@ function arrancarApp(){
   mostrar('vApp');
   el('uNombre').textContent=perfil.nombre;
   el('uArea').textContent=(areas.find(a=>a.id===perfil.area_id)||{}).nombre||'';
-  el('fArea').value=perfil.area_id;
+  el('fArea').value=perfil.area_id; el('sqArea').value=perfil.area_id;
   cargarCampanias(); cargarResumen();
 }
 
@@ -284,7 +325,7 @@ function el(id){return document.getElementById(id);}
 function llenarAreas(sel){
   el(sel).innerHTML=areas.map(a=>`<option value="${a.id}">${a.nombre}</option>`).join('');
 }
-function toast(msg,ms=2600){
+function toast(msg,ms=3000){
   const t=el('toast'); t.textContent=msg; t.style.display='block';
   clearTimeout(t._t); t._t=setTimeout(()=>t.style.display='none',ms);
 }
@@ -294,6 +335,7 @@ function beep(freq=880,dur=.12){
   o.frequency.value=freq; o.connect(g); g.connect(ctx.destination);
   g.gain.setValueAtTime(.25,ctx.currentTime); o.start(); o.stop(ctx.currentTime+dur);}catch(e){}
 }
+function campSel(){ const v=+el('selCampania').value; return v||null; }
 
 /* Normaliza el contenido del QR de appMUEBLES → '4|171360' */
 function parseQR(texto){
@@ -306,58 +348,144 @@ function parseQR(texto){
 
 /* ================= NAVEGACIÓN ================= */
 function irTab(t){
-  detenerEscaner();
-  ['Alta','Verif','Resumen'].forEach(x=>{
+  if(t!=='Scan') detenerEscaneo();
+  ['Scan','Sinqr','Avance'].forEach(x=>{
     el('tab'+x).classList.toggle('oculto', x!==t);
     el('n'+x).classList.toggle('on', x===t);
   });
-  if(t==='Resumen') cargarResumen();
+  if(t==='Avance') cargarResumen();
 }
 
-/* ================= ESCÁNER ================= */
-async function escanear(modo){
-  detenerEscaner(); modoScan=modo;
-  const divId = modo==='alta' ? 'lector' : 'lectorV';
-  scanner = new Html5Qrcode(divId);
-  const cfg={fps:10, qrbox:{width:230,height:230}};
+/* ================= ESCÁNER (qr-scanner) ================= */
+async function iniciarEscaneo(){
+  cancelarVinc(false);
+  el('visor').classList.remove('oculto');
+  el('scanCtrl').classList.remove('oculto');
+  el('btnScan').classList.add('oculto');
+  el('btnStop').classList.remove('oculto');
   try{
-    await scanner.start({facingMode:"environment"}, cfg, onQR);
-    if(modo==='verif'){ el('btnScanVerif').classList.add('oculto'); el('btnStopVerif').classList.remove('oculto'); }
-  }catch(e){ toast("No se pudo abrir la cámara: "+e); scanner=null; }
+    if(!qrs){
+      qrs=new QrScanner(el('vid'), r=>onDecode(r.data), {
+        returnDetailedScanResult:true,
+        preferredCamera:'environment',
+        highlightScanRegion:true,
+        highlightCodeOutline:true,
+        maxScansPerSecond:8,
+        calculateScanRegion: v=>{
+          const s=Math.min(v.videoWidth,v.videoHeight);
+          return {x:(v.videoWidth-s)/2,y:(v.videoHeight-s)/2,width:s,height:s,
+                  downScaledWidth:640,downScaledHeight:640};
+        }
+      });
+    }
+    await qrs.start();
+    escaneando=true;
+    try{ if(await qrs.hasFlash()) el('btnTorch').classList.remove('oculto'); }catch(e){}
+    try{
+      const track=el('vid').srcObject && el('vid').srcObject.getVideoTracks()[0];
+      const cap=track && track.getCapabilities ? track.getCapabilities() : null;
+      if(cap && cap.zoom){ zoomTrack=track; el('btnZoom').classList.remove('oculto'); }
+    }catch(e){}
+  }catch(e){
+    toast("No se pudo abrir la cámara: "+(e.message||e));
+    detenerEscaneo();
+  }
 }
-function detenerEscaner(){
-  if(scanner){ scanner.stop().catch(()=>{}); scanner.clear(); scanner=null; }
-  el('btnScanVerif')?.classList.remove('oculto');
-  el('btnStopVerif')?.classList.add('oculto');
+function detenerEscaneo(){
+  escaneando=false;
+  if(qrs){ try{qrs.stop();}catch(e){} }
+  torchOn=false; zoomNivel=1; zoomTrack=null;
+  el('btnTorch').classList.add('oculto'); el('btnTorch').classList.remove('act');
+  el('btnZoom').classList.add('oculto'); el('btnZoom').textContent='🔍 Zoom 1×'; el('btnZoom').classList.remove('act');
+  el('visor')?.classList.add('oculto');
+  el('scanCtrl')?.classList.add('oculto');
+  el('btnScan')?.classList.remove('oculto');
+  el('btnStop')?.classList.add('oculto');
+}
+async function toggleTorch(){
+  if(!qrs) return;
+  try{
+    await qrs.toggleFlash();
+    torchOn=!torchOn;
+    el('btnTorch').classList.toggle('act', torchOn);
+  }catch(e){ toast("La linterna no está disponible en este equipo."); }
+}
+async function cicloZoom(){
+  if(!zoomTrack) return;
+  try{
+    const cap=zoomTrack.getCapabilities();
+    const max=Math.min(cap.zoom.max||3, 4);
+    zoomNivel = zoomNivel>=max ? 1 : Math.min(zoomNivel+1, max);
+    await zoomTrack.applyConstraints({advanced:[{zoom:zoomNivel}]});
+    el('btnZoom').textContent='🔍 Zoom '+zoomNivel+'×';
+    el('btnZoom').classList.toggle('act', zoomNivel>1);
+  }catch(e){ toast("El zoom no está disponible en este equipo."); }
 }
 
-async function onQR(texto){
+/* Plan B: decodificar el QR desde una fotografía tomada con la cámara nativa */
+async function leerQRdeFoto(inp){
+  const f=inp.files[0]; inp.value='';
+  if(!f) return;
+  toast("Analizando la foto…");
+  try{
+    const r=await QrScanner.scanImage(f,{returnDetailedScanResult:true});
+    beep(880);
+    await procesarPayload(parseQR(r.data));
+  }catch(e){
+    beep(300);
+    toast("No se encontró un QR legible en la foto. Acércate a unos 10 cm, cuida el reflejo y vuelve a intentar.");
+  }
+}
+
+async function onDecode(texto){
   const ahora=Date.now();
   if(texto===ultimoQR && ahora-ultimoQRts<4000) return; // anti-rebote
   ultimoQR=texto; ultimoQRts=ahora;
-  const payload=parseQR(texto);
-  if(modoScan==='alta'){ detenerEscaner(); await flujoAlta(payload); }
-  else{ await flujoVerificacion(payload); } // escaneo continuo
+  await procesarPayload(parseQR(texto));
 }
 
-/* ================= ALTA / VINCULACIÓN ================= */
-let vincularBienId=null; // uuid del bien del catálogo al que se vinculará el QR
-
-async function flujoAlta(payload){
-  const {data:ya}=await sb.from('bienes').select('id_inventario,descripcion').eq('qr_payload',payload).maybeSingle();
-  if(ya){ flash('dup','QR ya vinculado', `${ya.descripcion||''} · ID ${ya.id_inventario||'s/n'}`); beep(440); return; }
-  beep(880);
-  el('fQr').value=payload;
-  el('formAlta').classList.remove('oculto');
-  banner('Teclea el ID visible de la etiqueta para buscarlo en el catálogo appsgob.');
-  el('fId').focus();
+/* ================= FLUJO ÚNICO: la app decide ================= */
+async function procesarPayload(payload){
+  const {data:bien}=await sb.from('bienes')
+    .select('id,descripcion,id_inventario').eq('qr_payload',payload).maybeSingle();
+  if(bien){
+    await verificarBien(bien);          // ya ligado → verificar
+  }else{
+    // QR nuevo → pausar y pedir el número visible para ligarlo
+    if(escaneando){ try{qrs.stop();}catch(e){} escaneando=false;
+      el('btnStop').classList.add('oculto'); el('btnScan').classList.remove('oculto'); }
+    beep(660);
+    el('fQr').value=payload;
+    el('cardVinc').classList.remove('oculto');
+    banner('bannerCat','Este QR aún no está ligado. Teclea el número visible de la etiqueta.');
+    el('formNuevo').classList.add('oculto');
+    vincularBienId=null;
+    el('fId').value=''; el('fId').focus();
+    el('cardVinc').scrollIntoView({behavior:'smooth'});
+  }
 }
-function altaSinQR(){
-  detenerEscaner(); el('fQr').value='';
-  el('formAlta').classList.remove('oculto'); el('fId').focus();
+
+/* Registra la verificación (si hay campaña) y ofrece foto de evidencia */
+async function verificarBien(bien){
+  const camp=campSel();
+  if(!camp){
+    flash('dup','Sin campaña activa','El bien "'+bien.descripcion+'" existe y está ligado, pero no hay campaña de verificación seleccionada.');
+    return;
+  }
+  const {data:v,error}=await sb.from('verificaciones')
+    .insert({campania_id:camp, bien_id:bien.id, usuario:usuario.id})
+    .select('id').single();
+  if(error){
+    if(error.code==='23505'){ beep(440); flash('dup','Ya verificado',`${bien.descripcion} · ID ${bien.id_inventario||'s/n'}`); }
+    else toast("Error: "+error.message);
+    return;
+  }
+  beep(1046);
+  pendVerifId=v.id; pendVerifDesc=bien.descripcion;
+  flash('ok','✓ Verificado',`${bien.descripcion} · ID ${bien.id_inventario||'s/n'}`, true);
 }
 
-/* Busca el ID tecleado en el catálogo precargado */
+/* ================= VINCULACIÓN (QR nuevo) ================= */
 async function buscarCatalogo(){
   vincularBienId=null;
   const id=el('fId').value.trim();
@@ -366,34 +494,35 @@ async function buscarCatalogo(){
     .select('id,descripcion,area_id,ubicacion,qr_payload,resguardante,marca,modelo')
     .eq('id_inventario',id).maybeSingle();
   if(!b){
-    banner('⚠ El ID '+id+' no está en el catálogo. Se registrará como bien nuevo (origen: campo).');
+    banner('bannerCat','⚠ El ID '+id+' no está en el catálogo. Llena los datos para registrarlo como bien nuevo.');
+    el('formNuevo').classList.remove('oculto');
+    el('fArea').value=perfil.area_id;
     return;
   }
   if(b.qr_payload && el('fQr').value && b.qr_payload!==el('fQr').value){
-    banner('✕ El ID '+id+' ya tiene otro QR vinculado ('+b.qr_payload+'). Verifica la etiqueta.');
+    banner('bannerCat','✕ El ID '+id+' ya tiene otro QR ligado ('+b.qr_payload+'). Revisa la etiqueta.');
     beep(300); return;
   }
   vincularBienId=b.id;
-  el('fDesc').value=b.descripcion||'';
-  el('fArea').value=b.area_id;
-  el('fUbi').value=b.ubicacion||'';
+  el('formNuevo').classList.add('oculto');
   const extra=[b.marca,b.modelo].filter(Boolean).join(' ');
-  banner('✓ Encontrado en catálogo: '+b.descripcion+(extra?' ('+extra+')':'')
+  banner('bannerCat','✓ Encontrado: '+b.descripcion+(extra?' ('+extra+')':'')
     +(b.resguardante?' · Resguardante: '+b.resguardante:'')
-    +'. Al guardar, el QR quedará vinculado a este bien.');
+    +'. Al guardar, el QR quedará ligado y el bien verificado.');
   beep(1046);
 }
 
-function banner(msg){
-  const b=el('bannerCat');
+function banner(id,msg){
+  const b=el(id);
   if(!msg){ b.classList.add('oculto'); return; }
   b.textContent=msg; b.classList.remove('oculto');
 }
-function cancelarAlta(){
-  el('formAlta').classList.add('oculto');
+function cancelarVinc(reanudar){
+  el('cardVinc').classList.add('oculto');
   ['fQr','fId','fDesc','fUbi'].forEach(i=>el(i).value='');
   el('fFoto').value=''; el('fotoPrev').classList.add('oculto');
-  banner(null); vincularBienId=null;
+  el('formNuevo').classList.add('oculto');
+  banner('bannerCat',null); vincularBienId=null;
 }
 function previsualizar(inp){
   if(inp.files[0]){ el('fotoPrev').src=URL.createObjectURL(inp.files[0]); el('fotoPrev').classList.remove('oculto'); }
@@ -413,101 +542,145 @@ function comprimir(file){
     img.src=URL.createObjectURL(file);
   });
 }
+async function subirFoto(file,prefijo){
+  const blob=await comprimir(file);
+  const ruta=`${prefijo}_${Date.now()}.jpg`.replace(/[^a-zA-Z0-9_.]/g,'_');
+  const {error}=await sb.storage.from('fotos').upload(ruta,blob,{contentType:'image/jpeg'});
+  if(error){ toast("La foto no se pudo subir: "+error.message); return null; }
+  return sb.storage.from('fotos').getPublicUrl(ruta).data.publicUrl;
+}
 
-async function guardarBien(){
+async function guardarVinculacion(){
   const qr=el('fQr').value||null, idInv=el('fId').value.trim()||null;
-  const desc=el('fDesc').value.trim(), area_id=+el('fArea').value, ubi=el('fUbi').value.trim();
-  if(!qr && !idInv) return toast("Se requiere QR o ID de inventario");
-  if(!desc) return toast("Escribe la descripción");
-  el('btnGuardar').disabled=true;
+  if(!idInv && !vincularBienId) return toast("Teclea el número visible de la etiqueta");
+  el('btnVinc').disabled=true;
 
   let foto_url=null;
-  const f=el('fFoto').files[0];
-  if(f){
-    const blob=await comprimir(f);
-    const ruta=`${(idInv||qr).replace(/[^a-zA-Z0-9]/g,'_')}_${Date.now()}.jpg`;
-    const {error:eUp}=await sb.storage.from('fotos').upload(ruta,blob,{contentType:'image/jpeg'});
-    if(!eUp) foto_url=sb.storage.from('fotos').getPublicUrl(ruta).data.publicUrl;
-  }
+  if(el('fFoto').files[0]) foto_url=await subirFoto(el('fFoto').files[0], 'bien_'+(idInv||'sn'));
 
-  let error;
+  let bienFinal=null, error=null;
   if(vincularBienId){
-    // Bien del catálogo appsgob: solo vincular QR (+foto/ubicación si cambió)
     const upd={vinculado_por:usuario.id, vinculado_en:new Date().toISOString()};
     if(qr) upd.qr_payload=qr;
     if(foto_url) upd.foto_url=foto_url;
-    if(ubi) upd.ubicacion=ubi;
     ({error}=await sb.from('bienes').update(upd).eq('id',vincularBienId));
+    if(!error){
+      const {data:b}=await sb.from('bienes').select('id,descripcion,id_inventario').eq('id',vincularBienId).single();
+      bienFinal=b;
+    }
   }else{
-    // Bien no catalogado: alta nueva con origen 'campo'
-    ({error}=await sb.from('bienes').insert({
+    const desc=el('fDesc').value.trim(), area_id=+el('fArea').value, ubi=el('fUbi').value.trim();
+    if(!desc){ el('btnVinc').disabled=false; return toast("Escribe la descripción del bien"); }
+    const {data:b,error:e}=await sb.from('bienes').insert({
       qr_payload:qr, id_inventario:idInv, descripcion:desc.toUpperCase(),
       area_id, ubicacion:ubi||null, foto_url, creado_por:usuario.id, origen:'campo'
-    }));
+    }).select('id,descripcion,id_inventario').single();
+    error=e; bienFinal=b;
   }
-  el('btnGuardar').disabled=false;
+  el('btnVinc').disabled=false;
   if(error){
-    if(error.code==='23505') return flash('dup','Duplicado','Ese QR o ID de inventario ya existe en la base.');
+    if(error.code==='23505') return flash('dup','Duplicado','Ese QR o número de inventario ya existe en la base.');
     return toast("Error: "+error.message);
   }
-  flash('ok', vincularBienId?'QR vinculado':'Bien registrado', `${desc.toUpperCase()} · ID ${idInv||'s/n'}`);
-  beep(1046); cancelarAlta();
+  cancelarVinc(false);
+  if(campSel() && bienFinal){ await verificarBien(bienFinal); }
+  else flash('ok','QR ligado', bienFinal ? `${bienFinal.descripcion} · ID ${bienFinal.id_inventario||'s/n'}` : '');
 }
 
-/* ================= VERIFICACIÓN ================= */
+/* ================= SIN QR (por número) ================= */
+let sqBien=null;
+async function buscarSinQR(){
+  sqBien=null;
+  el('fichaSq').classList.add('oculto'); el('btnVerifSq').classList.add('oculto');
+  el('formSqNuevo').classList.add('oculto');
+  const id=el('sqId').value.trim();
+  if(!id) return toast("Teclea el número de la etiqueta");
+  const {data:b}=await sb.from('bienes')
+    .select('id,descripcion,id_inventario,marca,modelo,resguardante,ubicacion')
+    .eq('id_inventario',id).maybeSingle();
+  if(!b){
+    banner('bannerSq','⚠ El ID '+id+' no está registrado. Puedes darlo de alta como bien nuevo:');
+    el('formSqNuevo').classList.remove('oculto');
+    el('sqArea').value=perfil.area_id;
+    return;
+  }
+  sqBien=b;
+  banner('bannerSq',null);
+  el('fichaSq').innerHTML=`<b>${b.descripcion}</b><br>
+    ${[b.marca,b.modelo].filter(Boolean).join(' ')||''}
+    ${b.resguardante?'<br>Resguardante: <b>'+b.resguardante+'</b>':''}
+    ${b.ubicacion?'<br>Ubicación: '+b.ubicacion:''}`;
+  el('fichaSq').classList.remove('oculto');
+  el('btnVerifSq').classList.remove('oculto');
+}
+async function verificarSinQR(){
+  if(!sqBien) return;
+  await verificarBien(sqBien);
+  el('sqId').value=''; el('fichaSq').classList.add('oculto'); el('btnVerifSq').classList.add('oculto');
+  sqBien=null;
+}
+async function registrarSinQR(){
+  const idInv=el('sqId').value.trim(), desc=el('sqDesc').value.trim();
+  const area_id=+el('sqArea').value, ubi=el('sqUbi').value.trim();
+  if(!idInv) return toast("Teclea el número de la etiqueta");
+  if(!desc) return toast("Escribe la descripción");
+  const {data:b,error}=await sb.from('bienes').insert({
+    id_inventario:idInv, descripcion:desc.toUpperCase(), area_id,
+    ubicacion:ubi||null, creado_por:usuario.id, origen:'campo'
+  }).select('id,descripcion,id_inventario').single();
+  if(error){
+    if(error.code==='23505') return flash('dup','Duplicado','Ese número de inventario ya existe.');
+    return toast("Error: "+error.message);
+  }
+  el('sqDesc').value=''; el('sqUbi').value=''; el('formSqNuevo').classList.add('oculto');
+  banner('bannerSq',null); el('sqId').value='';
+  if(campSel()) await verificarBien(b);
+  else flash('ok','Bien registrado',`${b.descripcion} · ID ${b.id_inventario}`);
+}
+
+/* ================= FOTO DE EVIDENCIA (verificación) ================= */
+function tomarEvidencia(){
+  clearTimeout(flashTimer);           // que el flash no se cierre solo
+  el('evidInput').click();
+}
+async function subirEvidencia(inp){
+  const f=inp.files[0]; inp.value='';
+  if(!f || !pendVerifId) { cerrarFlash(); return; }
+  toast("Subiendo foto de evidencia…");
+  const url=await subirFoto(f, 'evid_'+(campSel()||0)+'_'+pendVerifId);
+  if(url){
+    const {error}=await sb.from('verificaciones').update({foto_url:url}).eq('id',pendVerifId);
+    if(error) toast("La foto subió pero no se pudo anexar: "+error.message+". Avisa al administrador (falta actualizar la base).",5000);
+    else toast("✓ Foto de evidencia guardada · "+pendVerifDesc);
+  }
+  pendVerifId=null; pendVerifDesc="";
+  cerrarFlash();
+}
+
+/* ================= CAMPAÑAS ================= */
 async function cargarCampanias(){
   const {data}=await sb.from('campanias').select('*').eq('activa',true).order('id',{ascending:false});
   el('selCampania').innerHTML=(data||[]).map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('')
     || '<option value="">— sin campañas activas —</option>';
 }
 
-async function flujoVerificacion(payload){
-  const camp=+el('selCampania').value;
-  if(!camp){ toast("No hay campaña activa"); return; }
-  const {data:bien}=await sb.from('bienes')
-    .select('id,descripcion,id_inventario').eq('qr_payload',payload).maybeSingle();
-  if(!bien){
-    beep(300); flash('err','QR sin vincular','Este QR aún no está ligado a un bien del catálogo. Ve a la pestaña Alta, escanéalo y teclea el ID visible de la etiqueta.');
-    return;
-  }
-  const {error}=await sb.from('verificaciones').insert({
-    campania_id:camp, bien_id:bien.id, usuario:usuario.id
-  });
-  if(error){
-    if(error.code==='23505'){ beep(440); flash('dup','Ya verificado',`${bien.descripcion} · ID ${bien.id_inventario||'s/n'}`); }
-    else toast("Error: "+error.message);
-    return;
-  }
-  beep(1046);
-  flash('ok','✓ Verificado',`${bien.descripcion} · ID ${bien.id_inventario||'s/n'}`);
-}
-
-async function verificarManual(){
-  const id=el('verifManual').value.trim();
-  if(!id) return;
-  const camp=+el('selCampania').value;
-  if(!camp) return toast("No hay campaña activa");
-  const {data:bien}=await sb.from('bienes')
-    .select('id,descripcion,id_inventario').eq('id_inventario',id).maybeSingle();
-  if(!bien){ flash('err','No encontrado',`El ID ${id} no está registrado.`); return; }
-  const {error}=await sb.from('verificaciones').insert({campania_id:camp,bien_id:bien.id,usuario:usuario.id});
-  if(error && error.code==='23505') flash('dup','Ya verificado',bien.descripcion);
-  else if(error) toast("Error: "+error.message);
-  else { flash('ok','✓ Verificado',`${bien.descripcion} · ID ${bien.id_inventario}`); el('verifManual').value=''; }
-}
-
 /* ================= FLASH ================= */
 let flashTimer=null;
-function flash(tipo,titulo,detalle){
+function flash(tipo,titulo,detalle,conFoto){
   const f=el('flash');
   f.className=tipo; f.style.display='flex';
   el('flashSim').textContent = tipo==='ok'?'✓' : tipo==='dup'?'↺' : '✕';
   el('flashTit').textContent=titulo;
   el('flashDet').textContent=detalle||'';
+  el('flashFoto').classList.toggle('oculto', !conFoto);
   clearTimeout(flashTimer);
-  if(modoScan==='verif' && scanner) flashTimer=setTimeout(cerrarFlash, 1800); // continuo: se cierra solo
+  if(escaneando) flashTimer=setTimeout(cerrarFlash, conFoto?3500:2000); // continuo: se cierra solo
 }
-function cerrarFlash(){ el('flash').style.display='none'; }
+function cerrarFlash(){
+  el('flash').style.display='none';
+  el('flashFoto').classList.add('oculto');
+  pendVerifId=null;
+}
 
 /* ================= RESUMEN ================= */
 async function cargarResumen(){
@@ -519,7 +692,6 @@ async function cargarResumen(){
     const {data:v}=await sb.from('verificaciones').select('bien_id').eq('campania_id',camp.id).limit(10000);
     (v||[]).forEach(x=>verifSet.add(x.bien_id));
   }
-  // avance por área
   const porArea={};
   (bienes||[]).forEach(b=>{
     porArea[b.area_id]=porArea[b.area_id]||{t:0,v:0};
@@ -537,7 +709,6 @@ async function cargarResumen(){
   html+='</table>';
   el('resumenTabla').innerHTML=html;
 
-  // faltantes del área del usuario
   const falt=(bienes||[]).filter(b=>b.area_id===perfil.area_id && !verifSet.has(b.id));
   if(!camp) el('faltantesTabla').innerHTML='<p class="aviso">Sin campaña activa.</p>';
   else if(!falt.length) el('faltantesTabla').innerHTML='<p class="aviso" style="color:var(--verde);font-weight:700">✓ Todo verificado en tu área.</p>';
