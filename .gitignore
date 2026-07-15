@@ -4,8 +4,9 @@ IMG_*.jpg
 
 # Reportes y SQL con datos de resguardantes — NUNCA publicar en el repo público
 ReporteGeneral*.xlsx
-import_completo.sql
-import_bienes_splan.sql
+Bienes Muebles*.pdf
+Bienes Muebles*.xlsx
+import_*.sql
 
 # Documentación interna y herramientas (se quedan solo en local)
 PLAN_IMPLEMENTACION.md

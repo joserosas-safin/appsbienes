@@ -179,7 +179,9 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       <p class="aviso">Apunta al código QR de la etiqueta. La app decide sola: si el bien
         ya está ligado, lo <b>verifica</b>; si el QR es nuevo, te pide el número visible
         para <b>ligarlo y verificarlo</b> en un solo paso. Si la imagen se ve borrosa,
-        prueba el zoom, la linterna o el botón de leerlo de una foto.</p>
+        prueba el zoom, la linterna o el botón de leerlo de una foto.
+        <b>En teléfonos sencillos que no logran enfocar, el botón de "leerlo de una
+        foto" siempre funciona</b>: usa la cámara normal del teléfono, que sí enfoca.</p>
     </div>
 
     <!-- Tarjeta de vinculación: aparece cuando el QR escaneado es nuevo -->
@@ -374,12 +376,21 @@ async function iniciarEscaneo(){
         calculateScanRegion: v=>{
           const s=Math.min(v.videoWidth,v.videoHeight);
           return {x:(v.videoWidth-s)/2,y:(v.videoHeight-s)/2,width:s,height:s,
-                  downScaledWidth:640,downScaledHeight:640};
+                  downScaledWidth:768,downScaledHeight:768};
         }
       });
     }
     await qrs.start();
     escaneando=true;
+    // En equipos sencillos (Android gama baja) la cámara arranca en baja
+    // resolución y sin enfoque continuo: se lo pedimos explícitamente.
+    try{
+      const track=el('vid').srcObject && el('vid').srcObject.getVideoTracks()[0];
+      if(track){
+        await track.applyConstraints({width:{ideal:1920},height:{ideal:1080}}).catch(()=>{});
+        await track.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(()=>{});
+      }
+    }catch(e){}
     try{ if(await qrs.hasFlash()) el('btnTorch').classList.remove('oculto'); }catch(e){}
     try{
       const track=el('vid').srcObject && el('vid').srcObject.getVideoTracks()[0];
