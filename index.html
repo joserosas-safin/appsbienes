@@ -194,6 +194,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       <input id="fQr" readonly>
       <label>Número visible en la etiqueta (ID)</label>
       <input id="fId" inputmode="numeric" placeholder="ej. 115106" onchange="buscarCatalogo()">
+      <button class="btn btn-o" onclick="escanearID('fId')">📷 Leer el número con la cámara</button>
       <div id="bannerCat" class="oculto"></div>
       <div id="formNuevo" class="oculto">
         <label>Descripción</label>
@@ -219,6 +220,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
         no se pudo leer de ninguna forma.</p>
       <label>Número visible en la etiqueta (ID)</label>
       <input id="sqId" inputmode="numeric" placeholder="ej. 115106">
+      <button class="btn btn-o" onclick="escanearID('sqId')">📷 Leer el número con la cámara</button>
       <button class="btn btn-v" onclick="buscarSinQR()">Buscar bien</button>
       <div id="bannerSq" class="oculto"></div>
       <div id="fichaSq" class="ficha oculto"></div>
@@ -269,6 +271,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 <!-- Entradas de archivo ocultas -->
 <input id="qrFotoInput" type="file" accept="image/*" capture="environment" class="oculto" onchange="leerQRdeFoto(this)">
 <input id="evidInput" type="file" accept="image/*" capture="environment" class="oculto" onchange="subirEvidencia(this)">
+<input id="ocrInput" type="file" accept="image/*" capture="environment" class="oculto" onchange="leerIDdeFoto(this)">
 
 <script>
 /* ================= ESTADO ================= */
@@ -671,6 +674,85 @@ async function subirEvidencia(inp){
   }
   beep(1046);
   flash('ok','✓ Verificado',`${bien.descripcion} · ID ${bien.id_inventario||'s/n'}`);
+}
+
+/* ================= LECTOR DEL NÚMERO VISIBLE (OCR) ================= */
+let ocrTarget=null, ocrWorker=null;
+function escanearID(campo){ ocrTarget=campo; el('ocrInput').click(); }
+
+/* Carga el motor de OCR solo la primera vez que se usa */
+async function cargarOCR(){
+  if(ocrWorker) return ocrWorker;
+  if(!window.Tesseract){
+    toast("Descargando el lector de números (solo la primera vez)…",5000);
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+      s.onload=res; s.onerror=()=>rej(new Error("sin conexión para descargar el lector"));
+      document.head.appendChild(s);
+    });
+  }
+  ocrWorker=await Tesseract.createWorker('eng');
+  await ocrWorker.setParameters({tessedit_char_whitelist:'0123456789ID:'});
+  return ocrWorker;
+}
+
+/* Prepara la foto para el OCR: gris, contraste alto, buena resolución */
+function comprimirOCR(file){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      const max=1600, esc=Math.min(1, max/Math.max(img.width,img.height));
+      const c=document.createElement('canvas');
+      c.width=img.width*esc; c.height=img.height*esc;
+      const ctx=c.getContext('2d');
+      ctx.filter='grayscale(1) contrast(1.4)';
+      ctx.drawImage(img,0,0,c.width,c.height);
+      c.toBlob(b=>res(b),'image/jpeg',.85);
+    };
+    img.src=URL.createObjectURL(file);
+  });
+}
+
+async function leerIDdeFoto(inp){
+  const f=inp.files[0]; inp.value='';
+  if(!f || !ocrTarget) return;
+  toast("Leyendo el número de la etiqueta…",8000);
+  let texto="";
+  try{
+    const w=await cargarOCR();
+    const blob=await comprimirOCR(f);
+    const {data}=await w.recognize(blob);
+    texto=data.text||"";
+  }catch(e){ toast("No se pudo usar el lector: "+(e.message||e),4000); return; }
+  const nums=[...new Set(texto.match(/\d{3,7}/g)||[])];
+  if(!nums.length){
+    toast("No se distinguió ningún número. Acércate a la etiqueta, evita el reflejo y reintenta.",4000);
+    return;
+  }
+  // Se validan los candidatos contra el catálogo: gana el que exista
+  const {data:enCat}=await sb.from('bienes')
+    .select('id_inventario,descripcion').in('id_inventario',nums);
+  const hits=enCat||[];
+  if(hits.length===1){ aplicarID(ocrTarget,hits[0].id_inventario); }
+  else if(hits.length>1){ elegirEntre(ocrTarget,hits); }
+  else if(nums.length===1){
+    aplicarID(ocrTarget,nums[0]);
+    toast("Número leído: "+nums[0]+" (no está en el catálogo; revísalo antes de guardar)",4000);
+  }
+  else{ elegirEntre(ocrTarget, nums.map(n=>({id_inventario:n,descripcion:null}))); }
+}
+function aplicarID(campo,val){
+  el(campo).value=val;
+  beep(1046);
+  if(campo==='fId') buscarCatalogo(); else buscarSinQR();
+}
+function elegirEntre(campo,ops){
+  const b=el(campo==='fId'?'bannerCat':'bannerSq');
+  b.innerHTML='Se leyeron varios números; toca el de la etiqueta:<br>'+
+    ops.map(o=>`<button class="mini" style="flex:none;margin:6px 6px 0 0"
+      onclick="aplicarID('${campo}','${o.id_inventario}')">${o.id_inventario}${o.descripcion?' · '+String(o.descripcion).slice(0,26):''}</button>`).join('');
+  b.classList.remove('oculto');
 }
 
 /* ================= CAMPAÑAS ================= */
