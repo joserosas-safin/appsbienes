@@ -78,6 +78,7 @@ input[readonly]{background:#f1ede7; color:var(--verde-osc); font-weight:700;}
 #flash.ok{background:rgba(30,91,79,.96);}
 #flash.dup{background:rgba(165,127,44,.96);}
 #flash.err{background:rgba(97,18,50,.96);}
+#flash.foto{background:rgba(0,47,42,.97);}
 #flash .simbolo{font-size:88px; line-height:1;}
 #flash .titulo{font-size:26px; font-weight:900; text-transform:uppercase;
   letter-spacing:.08em; margin:12px 0 6px;}
@@ -178,7 +179,9 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       <button class="btn btn-o" onclick="el('qrFotoInput').click()">🖼 El QR no enfoca · leerlo de una foto</button>
       <p class="aviso">Apunta al código QR de la etiqueta. La app decide sola: si el bien
         ya está ligado, lo <b>verifica</b>; si el QR es nuevo, te pide el número visible
-        para <b>ligarlo y verificarlo</b> en un solo paso. Si la imagen se ve borrosa,
+        para <b>ligarlo y verificarlo</b> en un solo paso.
+        <b>Cada verificación exige foto de evidencia</b>: la app te la pedirá y el
+        registro se asienta hasta que la foto sube. Si la imagen se ve borrosa,
         prueba el zoom, la linterna o el botón de leerlo de una foto.
         <b>En teléfonos sencillos que no logran enfocar, el botón de "leerlo de una
         foto" siempre funciona</b>: usa la cámara normal del teléfono, que sí enfoca.</p>
@@ -272,8 +275,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 let sb=null, usuario=null, perfil=null, areas=[], qrs=null, escaneando=false;
 let ultimoQR="", ultimoQRts=0, zoomTrack=null, zoomNivel=1, torchOn=false;
 let vincularBienId=null;     // uuid del bien del catálogo al que se ligará el QR
-let pendVerifId=null;        // id de la verificación a la que se adjuntará la foto
-let pendVerifDesc="";
+let pendFoto=null;           // {bien,camp} en espera de foto de evidencia OBLIGATORIA
 
 /* ================= ARRANQUE ================= */
 window.addEventListener('load', async ()=>{
@@ -449,6 +451,7 @@ async function leerQRdeFoto(inp){
 }
 
 async function onDecode(texto){
+  if(pendFoto) return; // hay una verificación esperando su foto: no procesar más códigos
   const ahora=Date.now();
   if(texto===ultimoQR && ahora-ultimoQRts<4000) return; // anti-rebote
   ultimoQR=texto; ultimoQRts=ahora;
@@ -476,24 +479,21 @@ async function procesarPayload(payload){
   }
 }
 
-/* Registra la verificación (si hay campaña) y ofrece foto de evidencia */
+/* La verificación exige foto de evidencia: primero se identifica el bien,
+   y el registro se asienta hasta que la foto se toma y sube. */
 async function verificarBien(bien){
   const camp=campSel();
   if(!camp){
     flash('dup','Sin campaña activa','El bien "'+bien.descripcion+'" existe y está ligado, pero no hay campaña de verificación seleccionada.');
     return;
   }
-  const {data:v,error}=await sb.from('verificaciones')
-    .insert({campania_id:camp, bien_id:bien.id, usuario:usuario.id})
-    .select('id').single();
-  if(error){
-    if(error.code==='23505'){ beep(440); flash('dup','Ya verificado',`${bien.descripcion} · ID ${bien.id_inventario||'s/n'}`); }
-    else toast("Error: "+error.message);
-    return;
-  }
-  beep(1046);
-  pendVerifId=v.id; pendVerifDesc=bien.descripcion;
-  flash('ok','✓ Verificado',`${bien.descripcion} · ID ${bien.id_inventario||'s/n'}`, true);
+  const {data:ya}=await sb.from('verificaciones').select('id')
+    .eq('campania_id',camp).eq('bien_id',bien.id).maybeSingle();
+  if(ya){ beep(440); flash('dup','Ya verificado',`${bien.descripcion} · ID ${bien.id_inventario||'s/n'}`); return; }
+  beep(880);
+  pendFoto={bien, camp};
+  flash('foto','Foto de evidencia',
+    `${bien.descripcion} · ID ${bien.id_inventario||'s/n'} — Toma la foto del bien para asentar la verificación. Sin foto no se registra.`, true);
 }
 
 /* ================= VINCULACIÓN (QR nuevo) ================= */
@@ -649,23 +649,28 @@ async function registrarSinQR(){
   else flash('ok','Bien registrado',`${b.descripcion} · ID ${b.id_inventario}`);
 }
 
-/* ================= FOTO DE EVIDENCIA (verificación) ================= */
+/* ================= FOTO DE EVIDENCIA OBLIGATORIA ================= */
 function tomarEvidencia(){
-  clearTimeout(flashTimer);           // que el flash no se cierre solo
+  clearTimeout(flashTimer);
   el('evidInput').click();
 }
 async function subirEvidencia(inp){
   const f=inp.files[0]; inp.value='';
-  if(!f || !pendVerifId) { cerrarFlash(); return; }
+  if(!f || !pendFoto) return;
+  const {bien,camp}=pendFoto;
   toast("Subiendo foto de evidencia…");
-  const url=await subirFoto(f, 'evid_'+(campSel()||0)+'_'+pendVerifId);
-  if(url){
-    const {error}=await sb.from('verificaciones').update({foto_url:url}).eq('id',pendVerifId);
-    if(error) toast("La foto subió pero no se pudo anexar: "+error.message+". Avisa al administrador (falta actualizar la base).",5000);
-    else toast("✓ Foto de evidencia guardada · "+pendVerifDesc);
+  const url=await subirFoto(f, 'evid_'+camp+'_'+(bien.id_inventario||'sn'));
+  if(!url){ toast("La foto no se pudo subir. Revisa tu señal e inténtalo de nuevo.",4000); return; } // pendFoto se conserva para reintentar
+  const {error}=await sb.from('verificaciones')
+    .insert({campania_id:camp, bien_id:bien.id, usuario:usuario.id, foto_url:url});
+  pendFoto=null;
+  if(error){
+    if(error.code==='23505'){ beep(440); flash('dup','Ya verificado',`${bien.descripcion} · ID ${bien.id_inventario||'s/n'}`); }
+    else { toast("Error: "+error.message); cerrarFlash(); }
+    return;
   }
-  pendVerifId=null; pendVerifDesc="";
-  cerrarFlash();
+  beep(1046);
+  flash('ok','✓ Verificado',`${bien.descripcion} · ID ${bien.id_inventario||'s/n'}`);
 }
 
 /* ================= CAMPAÑAS ================= */
@@ -680,17 +685,19 @@ let flashTimer=null;
 function flash(tipo,titulo,detalle,conFoto){
   const f=el('flash');
   f.className=tipo; f.style.display='flex';
-  el('flashSim').textContent = tipo==='ok'?'✓' : tipo==='dup'?'↺' : '✕';
+  el('flashSim').textContent = tipo==='ok'?'✓' : tipo==='dup'?'↺' : tipo==='foto'?'📸' : '✕';
   el('flashTit').textContent=titulo;
   el('flashDet').textContent=detalle||'';
   el('flashFoto').classList.toggle('oculto', !conFoto);
+  document.querySelector('#flash .cerrar').textContent = tipo==='foto' ? 'Cancelar' : 'Continuar';
   clearTimeout(flashTimer);
-  if(escaneando) flashTimer=setTimeout(cerrarFlash, conFoto?3500:2000); // continuo: se cierra solo
+  // el aviso de foto obligatoria NUNCA se cierra solo; los demás sí en modo continuo
+  if(escaneando && tipo!=='foto') flashTimer=setTimeout(cerrarFlash, 2000);
 }
 function cerrarFlash(){
   el('flash').style.display='none';
   el('flashFoto').classList.add('oculto');
-  pendVerifId=null;
+  if(pendFoto){ pendFoto=null; toast("Verificación cancelada: sin foto de evidencia no se registra.",3500); }
 }
 
 /* ================= RESUMEN ================= */
