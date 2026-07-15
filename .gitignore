@@ -1,0 +1,17 @@
+# Fotos de referencia de etiquetas (no son parte de la app)
+IMG_*.jpeg
+IMG_*.jpg
+
+# Reportes y SQL con datos de resguardantes — NUNCA publicar en el repo público
+ReporteGeneral*.xlsx
+import_completo.sql
+import_bienes_splan.sql
+
+# Documentación interna y herramientas (se quedan solo en local)
+PLAN_IMPLEMENTACION.md
+INSTALACION.md
+importar_reporte.py
+schema_v2.sql
+
+# Sistema
+.DS_Store
