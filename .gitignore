@@ -1,6 +1,7 @@
-# Fotos de referencia de etiquetas (no son parte de la app)
+# Fotos de referencia y capturas de pantalla (no son parte de la app)
 IMG_*.jpeg
 IMG_*.jpg
+IMG_*.png
 
 # Reportes y SQL con datos de resguardantes — NUNCA publicar en el repo público
 ReporteGeneral*.xlsx
