@@ -14,6 +14,7 @@ PLAN_IMPLEMENTACION.md
 INSTALACION.md
 importar_reporte.py
 schema_v2.sql
+schema_v3_migracion.sql
 
 # Sistema
 .DS_Store

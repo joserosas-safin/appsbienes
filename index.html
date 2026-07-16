@@ -19,7 +19,6 @@
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   background:var(--fondo); color:var(--negro); min-height:100vh; padding-bottom:84px;}
 
-/* ---------- Encabezado institucional ---------- */
 header{background:var(--guinda-osc); color:var(--blanco); padding:14px 16px 12px;
   border-bottom:3px solid var(--dorado);}
 header .eyebrow{font-size:10px; letter-spacing:.22em; text-transform:uppercase;
@@ -28,17 +27,15 @@ header h1{font-size:18px; font-weight:800; letter-spacing:.01em; margin-top:2px;
 header .usuario{font-size:11px; color:rgba(255,255,255,.75); margin-top:3px;}
 header .usuario b{color:var(--dorado-cl);}
 
-/* ---------- Navegación inferior ---------- */
 nav{position:fixed; bottom:0; left:0; right:0; display:flex; z-index:50;
   background:var(--blanco); border-top:1px solid #e2ddd6;
   padding-bottom:env(safe-area-inset-bottom);}
-nav button{flex:1; padding:12px 4px 10px; border:0; background:none; font-size:11px;
-  font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--gris);
+nav button{flex:1; padding:12px 2px 10px; border:0; background:none; font-size:10px;
+  font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--gris);
   border-top:3px solid transparent; cursor:pointer;}
 nav button.on{color:var(--guinda); border-top-color:var(--guinda);}
 nav button .ic{display:block; font-size:20px; margin-bottom:2px;}
 
-/* ---------- Contenido ---------- */
 main{padding:16px; max-width:560px; margin:0 auto;}
 .card{background:var(--blanco); border:1px solid #e6e1d9; border-radius:14px;
   padding:16px; margin-bottom:14px; box-shadow:0 1px 3px rgba(22,26,29,.05);}
@@ -51,7 +48,6 @@ input,select,textarea{width:100%; padding:12px; font-size:16px; border:1.5px sol
 input:focus,select:focus,textarea:focus{outline:none; border-color:var(--guinda);}
 input[readonly]{background:#f1ede7; color:var(--verde-osc); font-weight:700;}
 
-/* ---------- Botones ---------- */
 .btn{display:block; width:100%; padding:15px; margin-top:14px; border:0; border-radius:12px;
   font-size:15px; font-weight:800; letter-spacing:.04em; text-transform:uppercase;
   cursor:pointer; transition:transform .06s;}
@@ -62,7 +58,6 @@ input[readonly]{background:#f1ede7; color:var(--verde-osc); font-weight:700;}
 .btn-g{background:#eceae5; color:var(--negro);}
 .btn:disabled{opacity:.45;}
 
-/* ---------- Visor de cámara ---------- */
 .visor{position:relative; border-radius:14px; overflow:hidden;
   border:3px solid var(--verde-osc); background:var(--negro); min-height:120px;}
 .visor video{display:block; width:100%;}
@@ -71,25 +66,47 @@ input[readonly]{background:#f1ede7; color:var(--verde-osc); font-weight:700;}
   background:var(--blanco); color:var(--verde-osc); font-size:14px; font-weight:800; cursor:pointer;}
 .mini.act{background:var(--verde-osc); color:var(--blanco);}
 
-/* ---------- Flash de resultado ---------- */
+/* ---------- Cámara de evidencia (pantalla completa) ---------- */
+#camEvid{position:fixed; inset:0; z-index:300; background:#000; display:none;
+  flex-direction:column;}
+#camEvid video{flex:1; width:100%; object-fit:cover; min-height:0;}
+#camTop{position:absolute; top:0; left:0; right:0; padding:12px 14px;
+  padding-top:calc(12px + env(safe-area-inset-top));
+  background:linear-gradient(rgba(0,0,0,.7),transparent); color:#fff;}
+#camTop .b{font-size:15px; font-weight:800;}
+#camGps{font-size:12px; margin-top:3px; color:var(--dorado-cl);}
+#camBottom{position:absolute; bottom:0; left:0; right:0;
+  padding:12px 14px calc(16px + env(safe-area-inset-bottom));
+  background:linear-gradient(transparent,rgba(0,0,0,.8));}
+#camThumbs{display:flex; gap:6px; overflow-x:auto; margin-bottom:10px; min-height:52px;}
+#camThumbs img{height:52px; width:52px; object-fit:cover; border-radius:8px;
+  border:2px solid #fff;}
+#camThumbs .del{position:relative;}
+.camrow{display:flex; align-items:center; gap:12px;}
+#btnShutter{width:70px; height:70px; border-radius:50%; border:5px solid #fff;
+  background:var(--guinda); cursor:pointer; flex:none;}
+#btnShutter:active{transform:scale(.94);}
+.camlbl{flex:1; color:#fff; font-size:12px;}
+.camx{background:none; border:0; color:#fff; font-size:26px; cursor:pointer;}
+#btnAsentar{background:var(--verde); color:#fff; border:0; border-radius:12px;
+  padding:14px; font-size:15px; font-weight:800; text-transform:uppercase; width:100%;
+  margin-top:10px; cursor:pointer;}
+#btnAsentar:disabled{opacity:.4;}
+
 #flash{position:fixed; inset:0; z-index:200; display:none; flex-direction:column;
   align-items:center; justify-content:center; text-align:center; padding:32px;
   color:var(--blanco); animation:pop .18s ease-out;}
 #flash.ok{background:rgba(30,91,79,.96);}
 #flash.dup{background:rgba(165,127,44,.96);}
 #flash.err{background:rgba(97,18,50,.96);}
-#flash.foto{background:rgba(0,47,42,.97);}
 #flash .simbolo{font-size:88px; line-height:1;}
 #flash .titulo{font-size:26px; font-weight:900; text-transform:uppercase;
   letter-spacing:.08em; margin:12px 0 6px;}
 #flash .detalle{font-size:16px; opacity:.92; max-width:340px;}
-#flash .accion{margin-top:26px; padding:14px 30px; border:0; border-radius:30px;
-  background:var(--blanco); color:var(--verde-osc); font-size:15px; font-weight:800;}
-#flash .cerrar{margin-top:14px; padding:12px 36px; border:2px solid rgba(255,255,255,.7);
+#flash .cerrar{margin-top:26px; padding:12px 36px; border:2px solid rgba(255,255,255,.7);
   border-radius:30px; background:none; color:var(--blanco); font-size:14px; font-weight:700;}
 @keyframes pop{from{opacity:0; transform:scale(1.04);} to{opacity:1; transform:scale(1);}}
 
-/* ---------- Tablas de resumen ---------- */
 table{width:100%; border-collapse:collapse; font-size:13px;}
 th{text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.1em;
   color:var(--gris); padding:6px 8px; border-bottom:2px solid var(--dorado-cl);}
@@ -101,18 +118,21 @@ td.num{text-align:right; font-variant-numeric:tabular-nums; font-weight:700;}
 
 .aviso{font-size:13px; color:var(--gris); line-height:1.5; margin-top:8px;}
 .oculto{display:none!important;}
-#toast{position:fixed; bottom:96px; left:50%; transform:translateX(-50%); z-index:150;
+#toast{position:fixed; bottom:96px; left:50%; transform:translateX(-50%); z-index:350;
   background:var(--negro); color:var(--blanco); padding:10px 20px; border-radius:24px;
   font-size:13px; font-weight:600; display:none; max-width:90%;}
-.foto-prev{width:100%; border-radius:10px; margin-top:8px; border:1px solid #d8d2c8;}
 .login-wrap{max-width:400px; margin:48px auto; padding:0 16px;}
 .login-wrap .escudo{text-align:center; margin-bottom:20px;}
 .login-wrap .escudo .eyebrow{font-size:10px; letter-spacing:.24em; text-transform:uppercase;
   color:var(--dorado); font-weight:700;}
 .login-wrap .escudo h1{font-size:24px; font-weight:900; color:var(--guinda-osc); margin-top:4px;}
-.ficha{margin-top:10px; padding:12px; border-radius:10px; background:#f1ede7;
-  font-size:14px; line-height:1.55;}
-.ficha b{color:var(--verde-osc);}
+.ficha{margin-top:10px; padding:12px; border-radius:10px; background:#f1ede7; font-size:13px;}
+.ficha .row{display:flex; justify-content:space-between; gap:10px; padding:4px 0;
+  border-bottom:1px solid #e4ddd2;}
+.ficha .row:last-child{border-bottom:0;}
+.ficha .k{color:var(--gris); text-transform:uppercase; font-size:10px; font-weight:700;
+  letter-spacing:.06em; flex:none; padding-top:2px;}
+.ficha .v{text-align:right; font-weight:600; color:var(--verde-osc);}
 #bannerCat,#bannerSq{margin-top:8px; padding:10px 12px; border-radius:10px;
   font-size:13px; font-weight:600; background:var(--dorado-cl); color:var(--verde-osc);}
 </style>
@@ -163,7 +183,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 </header>
 
 <main>
-  <!-- ---- PESTAÑA: ESCANEAR (todo en uno) ---- -->
+  <!-- ---- ESCANEAR ---- -->
   <section id="tabScan">
     <div class="card">
       <h2>Escanear etiquetas</h2>
@@ -177,17 +197,13 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       <button id="btnScan" class="btn btn-v" onclick="iniciarEscaneo()">📷 Iniciar escaneo</button>
       <button id="btnStop" class="btn btn-g oculto" onclick="detenerEscaneo()">⏹ Detener</button>
       <button class="btn btn-o" onclick="el('qrFotoInput').click()">🖼 El QR no enfoca · leerlo de una foto</button>
-      <p class="aviso">Apunta al código QR de la etiqueta. La app decide sola: si el bien
-        ya está ligado, lo <b>verifica</b>; si el QR es nuevo, te pide el número visible
-        para <b>ligarlo y verificarlo</b> en un solo paso.
-        <b>Cada verificación exige foto de evidencia</b>: la app te la pedirá y el
-        registro se asienta hasta que la foto sube. Si la imagen se ve borrosa,
-        prueba el zoom, la linterna o el botón de leerlo de una foto.
-        <b>En teléfonos sencillos que no logran enfocar, el botón de "leerlo de una
-        foto" siempre funciona</b>: usa la cámara normal del teléfono, que sí enfoca.</p>
+      <p class="aviso">Apunta al QR. Si ya está ligado, la app pide la <b>foto de evidencia</b>
+        y asienta la verificación; si es nuevo, te muestra sus datos para <b>ligarlo, corregir
+        y verificar</b>. En Samsung y equipos que no enfocan de cerca, usa el <b>zoom</b> o
+        el botón de <b>leerlo de una foto</b>.</p>
     </div>
 
-    <!-- Tarjeta de vinculación: aparece cuando el QR escaneado es nuevo -->
+    <!-- Tarjeta que aparece al leer un QR nuevo -->
     <div id="cardVinc" class="card oculto">
       <h2>Etiqueta nueva · ligar al catálogo</h2>
       <label>Código QR leído</label>
@@ -196,6 +212,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       <input id="fId" inputmode="numeric" placeholder="ej. 115106" onchange="buscarCatalogo()">
       <button class="btn btn-o" onclick="escanearID('fId')">📷 Leer el número con la cámara</button>
       <div id="bannerCat" class="oculto"></div>
+      <div id="fichaCat"></div>
       <div id="formNuevo" class="oculto">
         <label>Descripción</label>
         <input id="fDesc" placeholder="ej. ESCRITORIO EJECUTIVO STILA">
@@ -204,27 +221,26 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
         <label>Ubicación física</label>
         <input id="fUbi" placeholder="ej. Oficina 204, edificio SAFIN">
       </div>
-      <label>Foto del bien (evidencia, opcional aquí — también puedes tomarla al verificar)</label>
-      <input id="fFoto" type="file" accept="image/*" capture="environment" onchange="previsualizar(this)">
-      <img id="fotoPrev" class="foto-prev oculto">
-      <button id="btnVinc" class="btn btn-p" onclick="guardarVinculacion()">Ligar y verificar</button>
-      <button class="btn btn-g" onclick="cancelarVinc(true)">Cancelar</button>
+      <button id="btnVinc" class="btn btn-p oculto" onclick="ligarYVerificar()">Ligar y verificar</button>
+      <button id="btnCorrCat" class="btn btn-o oculto" onclick="abrirCorreccion()">✏️ Corregir datos del bien</button>
+      <button class="btn btn-g" onclick="cancelarVinc()">Cancelar</button>
     </div>
   </section>
 
-  <!-- ---- PESTAÑA: SIN QR ---- -->
+  <!-- ---- SIN QR ---- -->
   <section id="tabSinqr" class="oculto">
     <div class="card">
       <h2>Sin QR legible · por número</h2>
-      <p class="aviso" style="margin-top:0">Para etiquetas rotas, despegadas o cuyo QR
-        no se pudo leer de ninguna forma.</p>
+      <p class="aviso" style="margin-top:0">Para etiquetas rotas o despegadas, o para consultar
+        y corregir los datos de cualquier bien por su número.</p>
       <label>Número visible en la etiqueta (ID)</label>
       <input id="sqId" inputmode="numeric" placeholder="ej. 115106">
       <button class="btn btn-o" onclick="escanearID('sqId')">📷 Leer el número con la cámara</button>
       <button class="btn btn-v" onclick="buscarSinQR()">Buscar bien</button>
       <div id="bannerSq" class="oculto"></div>
-      <div id="fichaSq" class="ficha oculto"></div>
-      <button id="btnVerifSq" class="btn btn-p oculto" onclick="verificarSinQR()">✓ Verificar este bien</button>
+      <div id="fichaSq"></div>
+      <button id="btnVerifSq" class="btn btn-p oculto" onclick="verificarSinQR()">✓ Verificar (con foto)</button>
+      <button id="btnCorrSq" class="btn btn-o oculto" onclick="abrirCorreccion()">✏️ Corregir datos del bien</button>
       <div id="formSqNuevo" class="oculto">
         <label>Descripción</label>
         <input id="sqDesc" placeholder="Descripción del bien">
@@ -237,7 +253,27 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
     </div>
   </section>
 
-  <!-- ---- PESTAÑA: AVANCE ---- -->
+  <!-- ---- EXPORTAR ---- -->
+  <section id="tabExport" class="oculto">
+    <div class="card">
+      <h2>Exportar a Excel</h2>
+      <label>Campaña</label>
+      <select id="expCampania"></select>
+      <label>Ámbito</label>
+      <select id="expArea"><option value="">Todas las áreas</option></select>
+      <label>Estado de verificación</label>
+      <select id="expEstado">
+        <option value="todos">Todos los bienes</option>
+        <option value="verif">Solo verificados</option>
+        <option value="pend">Solo no verificados</option>
+      </select>
+      <button class="btn btn-p" onclick="exportarExcel()">⬇️ Descargar Excel</button>
+      <p class="aviso">El archivo incluye estado de verificación, quién y cuándo verificó,
+        número de fotos, coordenadas GPS y si el bien tiene una corrección pendiente.</p>
+    </div>
+  </section>
+
+  <!-- ---- AVANCE ---- -->
   <section id="tabAvance" class="oculto">
     <div class="card">
       <h2>Avance por área</h2>
@@ -254,46 +290,73 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 <nav>
   <button id="nScan" class="on" onclick="irTab('Scan')"><span class="ic">📷</span>Escanear</button>
   <button id="nSinqr" onclick="irTab('Sinqr')"><span class="ic">⌨️</span>Sin QR</button>
+  <button id="nExport" onclick="irTab('Export')"><span class="ic">⬇️</span>Exportar</button>
   <button id="nAvance" onclick="irTab('Avance')"><span class="ic">📊</span>Avance</button>
 </nav>
 </div>
 
-<!-- ============ FLASH DE RESULTADO ============ -->
+<!-- ============ CÁMARA DE EVIDENCIA (foto en vivo, con GPS y hora) ============ -->
+<div id="camEvid">
+  <div id="camTop">
+    <div class="b" id="camBien">—</div>
+    <div id="camGps">📍 Obteniendo ubicación…</div>
+  </div>
+  <video id="camVid" playsinline muted></video>
+  <div id="camBottom">
+    <div id="camThumbs"></div>
+    <div class="camrow">
+      <button class="camx" onclick="cerrarCamara(true)">✕</button>
+      <div class="camlbl" id="camHint">Toma al menos una foto del bien.</div>
+      <button id="btnShutter" onclick="capturarFoto()"></button>
+      <button class="camx" onclick="toggleTorchEvid()">🔦</button>
+    </div>
+    <button id="btnAsentar" disabled onclick="asentarVerificacion()">Asentar verificación</button>
+  </div>
+</div>
+
+<!-- ============ CORRECCIÓN DE DATOS (no destructiva) ============ -->
 <div id="flash">
   <div class="simbolo" id="flashSim">✓</div>
   <div class="titulo" id="flashTit">Verificado</div>
   <div class="detalle" id="flashDet"></div>
-  <button id="flashFoto" class="accion oculto" onclick="tomarEvidencia()">📸 Tomar foto de evidencia</button>
   <button class="cerrar" onclick="cerrarFlash()">Continuar</button>
 </div>
 <div id="toast"></div>
 
-<!-- Entradas de archivo ocultas -->
+<!-- Entradas de archivo ocultas (solo lectura de etiqueta, no evidencia) -->
 <input id="qrFotoInput" type="file" accept="image/*" capture="environment" class="oculto" onchange="leerQRdeFoto(this)">
-<input id="evidInput" type="file" accept="image/*" capture="environment" class="oculto" onchange="subirEvidencia(this)">
 <input id="ocrInput" type="file" accept="image/*" capture="environment" class="oculto" onchange="leerIDdeFoto(this)">
+<canvas id="capCanvas" class="oculto"></canvas>
 
 <script>
 /* ================= ESTADO ================= */
-let sb=null, usuario=null, perfil=null, areas=[], qrs=null, escaneando=false;
-let ultimoQR="", ultimoQRts=0, zoomTrack=null, zoomNivel=1, torchOn=false;
-let vincularBienId=null;     // uuid del bien del catálogo al que se ligará el QR
-let pendFoto=null;           // {bien,camp} en espera de foto de evidencia OBLIGATORIA
+let sb=null, usuario=null, perfil=null, areas=[];
+let scan={running:false, engine:null, qrs:null, bd:null, track:null, timer:null};
+let escaneando=false, ultimoQR="", ultimoQRts=0, zoomNivel=1, torchOn=false;
+let bienActivo=null;    // bien completo actualmente en pantalla (para verificar/corregir)
+let evid=null;          // contexto de la cámara de evidencia
+let watchId=null;
 
 /* ================= ARRANQUE ================= */
 window.addEventListener('load', async ()=>{
-  if(SUPABASE_URL.startsWith("PEGA")){ alert("Configura SUPABASE_URL y SUPABASE_ANON_KEY en el archivo."); return; }
+  if(SUPABASE_URL.startsWith("PEGA")){ alert("Configura SUPABASE_URL y SUPABASE_ANON_KEY."); return; }
   sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const {data:{session}} = await sb.auth.getSession();
   if(session){ usuario=session.user; await postLogin(); }
   else mostrar('vLogin');
 });
-
 function mostrar(id){
   ['vLogin','vPerfil','vApp'].forEach(v=>document.getElementById(v).classList.add('oculto'));
   document.getElementById(id).classList.remove('oculto');
 }
-
+// Al mandar la app a segundo plano / bloquear pantalla: liberar cámara y GPS.
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden){
+    detenerEscaneo();
+    if(watchId!=null && navigator.geolocation){ navigator.geolocation.clearWatch(watchId); watchId=null; }
+  }
+});
+window.addEventListener('pagehide', ()=>{ detenerEscaneo(); if(evid) cerrarCamara(false); });
 async function iniciarSesion(){
   const email=el('loginEmail').value.trim(), pass=el('loginPass').value;
   const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
@@ -301,16 +364,15 @@ async function iniciarSesion(){
   usuario=data.user; await postLogin();
 }
 async function cerrarSesion(){ await sb.auth.signOut(); location.reload(); }
-
 async function postLogin(){
   const {data:a}=await sb.from('areas').select('*').order('nombre');
   areas=a||[];
   llenarAreas('perfilArea'); llenarAreas('fArea'); llenarAreas('sqArea');
+  llenarAreasExport();
   const {data:p}=await sb.from('perfiles').select('*').eq('id',usuario.id).maybeSingle();
   if(!p){ mostrar('vPerfil'); return; }
   perfil=p; arrancarApp();
 }
-
 async function guardarPerfil(){
   const nombre=el('perfilNombre').value.trim(), area_id=+el('perfilArea').value;
   if(!nombre) return toast("Escribe tu nombre");
@@ -318,7 +380,6 @@ async function guardarPerfil(){
   if(error) return toast("Error: "+error.message);
   perfil={id:usuario.id,nombre,area_id}; arrancarApp();
 }
-
 function arrancarApp(){
   mostrar('vApp');
   el('uNombre').textContent=perfil.nombre;
@@ -329,88 +390,119 @@ function arrancarApp(){
 
 /* ================= UTILIDADES ================= */
 function el(id){return document.getElementById(id);}
-function llenarAreas(sel){
-  el(sel).innerHTML=areas.map(a=>`<option value="${a.id}">${a.nombre}</option>`).join('');
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function llenarAreas(sel){ el(sel).innerHTML=areas.map(a=>`<option value="${a.id}">${esc(a.nombre)}</option>`).join(''); }
+function llenarAreasExport(){
+  el('expArea').innerHTML='<option value="">Todas las áreas</option>'+
+    areas.map(a=>`<option value="${a.id}">${esc(a.nombre)}</option>`).join('');
 }
 function toast(msg,ms=3000){
   const t=el('toast'); t.textContent=msg; t.style.display='block';
   clearTimeout(t._t); t._t=setTimeout(()=>t.style.display='none',ms);
 }
+let audioCtx=null;
 function beep(freq=880,dur=.12){
-  try{const ctx=new (window.AudioContext||window.webkitAudioContext)();
-  const o=ctx.createOscillator(),g=ctx.createGain();
-  o.frequency.value=freq; o.connect(g); g.connect(ctx.destination);
-  g.gain.setValueAtTime(.25,ctx.currentTime); o.start(); o.stop(ctx.currentTime+dur);}catch(e){}
+  try{
+    if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume();
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.frequency.value=freq; o.connect(g); g.connect(audioCtx.destination);
+    g.gain.setValueAtTime(.25,audioCtx.currentTime); o.start(); o.stop(audioCtx.currentTime+dur);
+  }catch(e){}
 }
 function campSel(){ const v=+el('selCampania').value; return v||null; }
-
-/* Normaliza el contenido del QR de appMUEBLES → '4|171360' */
 function parseQR(texto){
   let t=texto.trim();
   try{t=decodeURIComponent(t);}catch(e){}
   const m=t.match(/[?&]d=([^&\s]+)/i);
   if(m){ let d=m[1]; try{d=decodeURIComponent(d);}catch(e){} return d.replace(/%7c/gi,'|'); }
-  return t; // QR de otro formato: se usa tal cual como llave
+  return t;
 }
 
 /* ================= NAVEGACIÓN ================= */
 function irTab(t){
   if(t!=='Scan') detenerEscaneo();
-  ['Scan','Sinqr','Avance'].forEach(x=>{
+  ['Scan','Sinqr','Export','Avance'].forEach(x=>{
     el('tab'+x).classList.toggle('oculto', x!==t);
     el('n'+x).classList.toggle('on', x===t);
   });
   if(t==='Avance') cargarResumen();
+  if(t==='Export') cargarCampaniasExport();
 }
 
-/* ================= ESCÁNER (qr-scanner) ================= */
+/* ================= ESCÁNER (BarcodeDetector nativo + qr-scanner) =================
+   Samsung Galaxy S25 y otros equipos con lente de foco largo fallan con el
+   lector JS clásico. En Android usamos BarcodeDetector (motor nativo de Google),
+   mucho más robusto con QR densos y a alta resolución. En iPhone (sin
+   BarcodeDetector) se usa qr-scanner, que ahí funciona bien. */
+async function soportaBarcodeDetector(){
+  if(!('BarcodeDetector' in window)) return false;
+  try{ const f=await window.BarcodeDetector.getSupportedFormats(); return f.includes('qr_code'); }
+  catch(e){ return false; }
+}
 async function iniciarEscaneo(){
-  cancelarVinc(false);
+  cancelarVinc();
   el('visor').classList.remove('oculto');
   el('scanCtrl').classList.remove('oculto');
   el('btnScan').classList.add('oculto');
   el('btnStop').classList.remove('oculto');
   try{
-    if(!qrs){
-      qrs=new QrScanner(el('vid'), r=>onDecode(r.data), {
-        returnDetailedScanResult:true,
-        preferredCamera:'environment',
-        highlightScanRegion:true,
-        highlightCodeOutline:true,
-        maxScansPerSecond:8,
-        calculateScanRegion: v=>{
-          const s=Math.min(v.videoWidth,v.videoHeight);
-          return {x:(v.videoWidth-s)/2,y:(v.videoHeight-s)/2,width:s,height:s,
-                  downScaledWidth:768,downScaledHeight:768};
-        }
-      });
-    }
-    await qrs.start();
+    if(await soportaBarcodeDetector()){ await startBD(); }
+    else { await startQR(); }
     escaneando=true;
-    // En equipos sencillos (Android gama baja) la cámara arranca en baja
-    // resolución y sin enfoque continuo: se lo pedimos explícitamente.
-    try{
-      const track=el('vid').srcObject && el('vid').srcObject.getVideoTracks()[0];
-      if(track){
-        await track.applyConstraints({width:{ideal:1920},height:{ideal:1080}}).catch(()=>{});
-        await track.applyConstraints({advanced:[{focusMode:'continuous'}]}).catch(()=>{});
-      }
-    }catch(e){}
-    try{ if(await qrs.hasFlash()) el('btnTorch').classList.remove('oculto'); }catch(e){}
-    try{
-      const track=el('vid').srcObject && el('vid').srcObject.getVideoTracks()[0];
-      const cap=track && track.getCapabilities ? track.getCapabilities() : null;
-      if(cap && cap.zoom){ zoomTrack=track; el('btnZoom').classList.remove('oculto'); }
-    }catch(e){}
+    prepararControles();
   }catch(e){
-    toast("No se pudo abrir la cámara: "+(e.message||e));
+    toast("No se pudo abrir la cámara: "+(e.message||e),4000);
     detenerEscaneo();
   }
 }
+async function startBD(){
+  scan.engine='bd';
+  const stream=await navigator.mediaDevices.getUserMedia({
+    video:{ facingMode:{ideal:'environment'}, width:{ideal:1920}, height:{ideal:1080} },
+    audio:false });
+  el('vid').srcObject=stream; await el('vid').play();
+  scan.track=stream.getVideoTracks()[0];
+  scan.bd=new window.BarcodeDetector({formats:['qr_code']});
+  scan.running=true;
+  loopBD();
+}
+async function loopBD(){
+  if(!scan.running) return;
+  try{
+    const codes=await scan.bd.detect(el('vid'));
+    if(codes && codes.length && codes[0].rawValue){ await onDecode(codes[0].rawValue); }
+  }catch(e){}
+  if(scan.running) scan.timer=setTimeout(loopBD, 130);
+}
+async function startQR(){
+  scan.engine='qr';
+  if(!scan.qrs){
+    scan.qrs=new QrScanner(el('vid'), r=>onDecode(r.data), {
+      returnDetailedScanResult:true, preferredCamera:'environment',
+      highlightScanRegion:true, highlightCodeOutline:true, maxScansPerSecond:8,
+      calculateScanRegion: v=>{
+        const s=Math.min(v.videoWidth,v.videoHeight);
+        return {x:(v.videoWidth-s)/2,y:(v.videoHeight-s)/2,width:s,height:s,
+                downScaledWidth:768,downScaledHeight:768};
+      }
+    });
+  }
+  await scan.qrs.start();
+  scan.track=el('vid').srcObject && el('vid').srcObject.getVideoTracks()[0];
+}
+async function prepararControles(){
+  try{ await scan.track.applyConstraints({advanced:[{focusMode:'continuous'}]}); }catch(e){}
+  const cap = scan.track && scan.track.getCapabilities ? scan.track.getCapabilities() : {};
+  if(cap.torch) el('btnTorch').classList.remove('oculto');
+  if(cap.zoom)  el('btnZoom').classList.remove('oculto');
+}
 function detenerEscaneo(){
-  escaneando=false;
-  if(qrs){ try{qrs.stop();}catch(e){} }
-  torchOn=false; zoomNivel=1; zoomTrack=null;
+  escaneando=false; scan.running=false;
+  clearTimeout(scan.timer);
+  if(scan.engine==='qr' && scan.qrs){ try{scan.qrs.stop();}catch(e){} }
+  else if(el('vid').srcObject){ el('vid').srcObject.getTracks().forEach(t=>t.stop()); el('vid').srcObject=null; }
+  scan.track=null; scan.engine=null; torchOn=false; zoomNivel=1;
   el('btnTorch').classList.add('oculto'); el('btnTorch').classList.remove('act');
   el('btnZoom').classList.add('oculto'); el('btnZoom').textContent='🔍 Zoom 1×'; el('btnZoom').classList.remove('act');
   el('visor')?.classList.add('oculto');
@@ -419,219 +511,152 @@ function detenerEscaneo(){
   el('btnStop')?.classList.add('oculto');
 }
 async function toggleTorch(){
-  if(!qrs) return;
-  try{
-    await qrs.toggleFlash();
-    torchOn=!torchOn;
+  if(!scan.track) return;
+  try{ torchOn=!torchOn; await scan.track.applyConstraints({advanced:[{torch:torchOn}]});
     el('btnTorch').classList.toggle('act', torchOn);
   }catch(e){ toast("La linterna no está disponible en este equipo."); }
 }
 async function cicloZoom(){
-  if(!zoomTrack) return;
+  if(!scan.track) return;
   try{
-    const cap=zoomTrack.getCapabilities();
-    const max=Math.min(cap.zoom.max||3, 4);
-    zoomNivel = zoomNivel>=max ? 1 : Math.min(zoomNivel+1, max);
-    await zoomTrack.applyConstraints({advanced:[{zoom:zoomNivel}]});
+    const cap=scan.track.getCapabilities();
+    if(!cap.zoom){ toast("El zoom no está disponible en este equipo."); return; }
+    const max=Math.min(cap.zoom.max||3, 5);
+    zoomNivel = zoomNivel>=max ? (cap.zoom.min||1) : Math.min(zoomNivel+1, max);
+    await scan.track.applyConstraints({advanced:[{zoom:zoomNivel}]});
     el('btnZoom').textContent='🔍 Zoom '+zoomNivel+'×';
     el('btnZoom').classList.toggle('act', zoomNivel>1);
   }catch(e){ toast("El zoom no está disponible en este equipo."); }
 }
-
-/* Plan B: decodificar el QR desde una fotografía tomada con la cámara nativa */
 async function leerQRdeFoto(inp){
   const f=inp.files[0]; inp.value='';
   if(!f) return;
   toast("Analizando la foto…");
   try{
     const r=await QrScanner.scanImage(f,{returnDetailedScanResult:true});
-    beep(880);
-    await procesarPayload(parseQR(r.data));
+    beep(880); await procesarPayload(parseQR(r.data));
   }catch(e){
     beep(300);
-    toast("No se encontró un QR legible en la foto. Acércate a unos 10 cm, cuida el reflejo y vuelve a intentar.");
+    toast("No se encontró un QR legible en la foto. Acércate ~10 cm, cuida el reflejo y reintenta.",4000);
   }
 }
-
 async function onDecode(texto){
-  if(pendFoto) return; // hay una verificación esperando su foto: no procesar más códigos
+  if(scan.procesando) return;                          // candado de reentrada
+  if(el('camEvid').style.display==='flex') return;      // cámara de evidencia abierta
   const ahora=Date.now();
-  if(texto===ultimoQR && ahora-ultimoQRts<4000) return; // anti-rebote
-  ultimoQR=texto; ultimoQRts=ahora;
-  await procesarPayload(parseQR(texto));
+  if(texto===ultimoQR && ahora-ultimoQRts<4000) return; // anti-rebote (mismo QR)
+  scan.procesando=true;
+  try{ ultimoQR=texto; ultimoQRts=ahora; await procesarPayload(parseQR(texto)); }
+  finally{ scan.procesando=false; }
 }
 
 /* ================= FLUJO ÚNICO: la app decide ================= */
 async function procesarPayload(payload){
-  const {data:bien}=await sb.from('bienes')
-    .select('id,descripcion,id_inventario').eq('qr_payload',payload).maybeSingle();
-  if(bien){
-    await verificarBien(bien);          // ya ligado → verificar
-  }else{
-    // QR nuevo → pausar y pedir el número visible para ligarlo
-    if(escaneando){ try{qrs.stop();}catch(e){} escaneando=false;
-      el('btnStop').classList.add('oculto'); el('btnScan').classList.remove('oculto'); }
+  const {data:bien}=await sb.from('bienes').select('*').eq('qr_payload',payload).maybeSingle();
+  if(bien){ await verificarBien(bien); }
+  else{
+    detenerEscaneo();
     beep(660);
     el('fQr').value=payload;
     el('cardVinc').classList.remove('oculto');
-    banner('bannerCat','Este QR aún no está ligado. Teclea el número visible de la etiqueta.');
-    el('formNuevo').classList.add('oculto');
-    vincularBienId=null;
-    el('fId').value=''; el('fId').focus();
+    banner('bannerCat','Este QR aún no está ligado. Teclea o fotografía el número visible de la etiqueta.');
+    el('fichaCat').innerHTML=''; el('formNuevo').classList.add('oculto');
+    el('btnVinc').classList.add('oculto'); el('btnCorrCat').classList.add('oculto');
+    bienActivo=null; el('fId').value=''; el('fId').focus();
     el('cardVinc').scrollIntoView({behavior:'smooth'});
   }
 }
 
-/* La verificación exige foto de evidencia: primero se identifica el bien,
-   y el registro se asienta hasta que la foto se toma y sube. */
+/* Verificar = tomar >=1 foto de evidencia (en vivo, con GPS). */
 async function verificarBien(bien){
   const camp=campSel();
-  if(!camp){
-    flash('dup','Sin campaña activa','El bien "'+bien.descripcion+'" existe y está ligado, pero no hay campaña de verificación seleccionada.');
-    return;
-  }
-  const {data:ya}=await sb.from('verificaciones').select('id')
-    .eq('campania_id',camp).eq('bien_id',bien.id).maybeSingle();
+  if(!camp){ flash('dup','Sin campaña activa','El bien "'+bien.descripcion+'" está ligado, pero no hay campaña seleccionada.'); return; }
+  const {data:ya}=await sb.from('verificaciones').select('id').eq('campania_id',camp).eq('bien_id',bien.id).maybeSingle();
   if(ya){ beep(440); flash('dup','Ya verificado',`${bien.descripcion} · ID ${bien.id_inventario||'s/n'}`); return; }
   beep(880);
-  pendFoto={bien, camp};
-  flash('foto','Foto de evidencia',
-    `${bien.descripcion} · ID ${bien.id_inventario||'s/n'} — Toma la foto del bien para asentar la verificación. Sin foto no se registra.`, true);
+  abrirCamara(bien, camp);
 }
 
 /* ================= VINCULACIÓN (QR nuevo) ================= */
 async function buscarCatalogo(){
-  vincularBienId=null;
+  bienActivo=null; el('fichaCat').innerHTML='';
+  el('btnVinc').classList.add('oculto'); el('btnCorrCat').classList.add('oculto');
   const id=el('fId').value.trim();
   if(!id) return;
-  const {data:b}=await sb.from('bienes')
-    .select('id,descripcion,area_id,ubicacion,qr_payload,resguardante,marca,modelo')
-    .eq('id_inventario',id).maybeSingle();
+  const {data:b}=await sb.from('bienes').select('*').eq('id_inventario',id).maybeSingle();
   if(!b){
     banner('bannerCat','⚠ El ID '+id+' no está en el catálogo. Llena los datos para registrarlo como bien nuevo.');
-    el('formNuevo').classList.remove('oculto');
-    el('fArea').value=perfil.area_id;
+    el('formNuevo').classList.remove('oculto'); el('fArea').value=perfil.area_id;
+    el('btnVinc').classList.remove('oculto');
     return;
   }
   if(b.qr_payload && el('fQr').value && b.qr_payload!==el('fQr').value){
     banner('bannerCat','✕ El ID '+id+' ya tiene otro QR ligado ('+b.qr_payload+'). Revisa la etiqueta.');
     beep(300); return;
   }
-  vincularBienId=b.id;
+  bienActivo=b;
   el('formNuevo').classList.add('oculto');
-  const extra=[b.marca,b.modelo].filter(Boolean).join(' ');
-  banner('bannerCat','✓ Encontrado: '+b.descripcion+(extra?' ('+extra+')':'')
-    +(b.resguardante?' · Resguardante: '+b.resguardante:'')
-    +'. Al guardar, el QR quedará ligado y el bien verificado.');
+  banner('bannerCat','✓ Encontrado en catálogo. Revisa los datos: al guardar, el QR queda ligado y el bien se verifica con foto.');
+  el('fichaCat').innerHTML=fichaHTML(b);
+  el('btnVinc').classList.remove('oculto'); el('btnCorrCat').classList.remove('oculto');
   beep(1046);
 }
-
-function banner(id,msg){
-  const b=el(id);
-  if(!msg){ b.classList.add('oculto'); return; }
-  b.textContent=msg; b.classList.remove('oculto');
-}
-function cancelarVinc(reanudar){
+function banner(id,msg){ const b=el(id); if(!msg){b.classList.add('oculto');return;} b.textContent=msg; b.classList.remove('oculto'); }
+function cancelarVinc(){
   el('cardVinc').classList.add('oculto');
   ['fQr','fId','fDesc','fUbi'].forEach(i=>el(i).value='');
-  el('fFoto').value=''; el('fotoPrev').classList.add('oculto');
-  el('formNuevo').classList.add('oculto');
-  banner('bannerCat',null); vincularBienId=null;
+  el('fichaCat').innerHTML=''; el('formNuevo').classList.add('oculto');
+  el('btnVinc').classList.add('oculto'); el('btnCorrCat').classList.add('oculto');
+  banner('bannerCat',null); bienActivo=null;
 }
-function previsualizar(inp){
-  if(inp.files[0]){ el('fotoPrev').src=URL.createObjectURL(inp.files[0]); el('fotoPrev').classList.remove('oculto'); }
-}
-
-/* Comprime la foto a máx 1280px JPEG antes de subir */
-function comprimir(file){
-  return new Promise(res=>{
-    const img=new Image();
-    img.onload=()=>{
-      const max=1280, esc=Math.min(1, max/Math.max(img.width,img.height));
-      const c=document.createElement('canvas');
-      c.width=img.width*esc; c.height=img.height*esc;
-      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-      c.toBlob(b=>res(b),'image/jpeg',.72);
-    };
-    img.src=URL.createObjectURL(file);
-  });
-}
-async function subirFoto(file,prefijo){
-  const blob=await comprimir(file);
-  const ruta=`${prefijo}_${Date.now()}.jpg`.replace(/[^a-zA-Z0-9_.]/g,'_');
-  const {error}=await sb.storage.from('fotos').upload(ruta,blob,{contentType:'image/jpeg'});
-  if(error){ toast("La foto no se pudo subir: "+error.message); return null; }
-  return sb.storage.from('fotos').getPublicUrl(ruta).data.publicUrl;
-}
-
-async function guardarVinculacion(){
+async function ligarYVerificar(){
   const qr=el('fQr').value||null, idInv=el('fId').value.trim()||null;
-  if(!idInv && !vincularBienId) return toast("Teclea el número visible de la etiqueta");
   el('btnVinc').disabled=true;
-
-  let foto_url=null;
-  if(el('fFoto').files[0]) foto_url=await subirFoto(el('fFoto').files[0], 'bien_'+(idInv||'sn'));
-
-  let bienFinal=null, error=null;
-  if(vincularBienId){
+  let bienFinal=bienActivo, error=null;
+  if(bienActivo){
     const upd={vinculado_por:usuario.id, vinculado_en:new Date().toISOString()};
     if(qr) upd.qr_payload=qr;
-    if(foto_url) upd.foto_url=foto_url;
-    ({error}=await sb.from('bienes').update(upd).eq('id',vincularBienId));
-    if(!error){
-      const {data:b}=await sb.from('bienes').select('id,descripcion,id_inventario').eq('id',vincularBienId).single();
-      bienFinal=b;
-    }
+    ({error}=await sb.from('bienes').update(upd).eq('id',bienActivo.id));
   }else{
     const desc=el('fDesc').value.trim(), area_id=+el('fArea').value, ubi=el('fUbi').value.trim();
     if(!desc){ el('btnVinc').disabled=false; return toast("Escribe la descripción del bien"); }
     const {data:b,error:e}=await sb.from('bienes').insert({
       qr_payload:qr, id_inventario:idInv, descripcion:desc.toUpperCase(),
-      area_id, ubicacion:ubi||null, foto_url, creado_por:usuario.id, origen:'campo'
-    }).select('id,descripcion,id_inventario').single();
+      area_id, ubicacion:ubi||null, creado_por:usuario.id, origen:'campo'
+    }).select('*').single();
     error=e; bienFinal=b;
   }
   el('btnVinc').disabled=false;
   if(error){
-    if(error.code==='23505') return flash('dup','Duplicado','Ese QR o número de inventario ya existe en la base.');
+    if(error.code==='23505') return flash('dup','Duplicado','Ese QR o número de inventario ya existe.');
     return toast("Error: "+error.message);
   }
-  cancelarVinc(false);
-  if(campSel() && bienFinal){ await verificarBien(bienFinal); }
+  const camp=campSel();
+  cancelarVinc();
+  if(camp && bienFinal) await verificarBien(bienFinal);   // valida duplicado antes de pedir foto
   else flash('ok','QR ligado', bienFinal ? `${bienFinal.descripcion} · ID ${bienFinal.id_inventario||'s/n'}` : '');
 }
 
-/* ================= SIN QR (por número) ================= */
-let sqBien=null;
+/* ================= SIN QR ================= */
 async function buscarSinQR(){
-  sqBien=null;
-  el('fichaSq').classList.add('oculto'); el('btnVerifSq').classList.add('oculto');
+  bienActivo=null; el('fichaSq').innerHTML='';
+  el('btnVerifSq').classList.add('oculto'); el('btnCorrSq').classList.add('oculto');
   el('formSqNuevo').classList.add('oculto');
   const id=el('sqId').value.trim();
   if(!id) return toast("Teclea el número de la etiqueta");
-  const {data:b}=await sb.from('bienes')
-    .select('id,descripcion,id_inventario,marca,modelo,resguardante,ubicacion')
-    .eq('id_inventario',id).maybeSingle();
+  const {data:b}=await sb.from('bienes').select('*').eq('id_inventario',id).maybeSingle();
   if(!b){
     banner('bannerSq','⚠ El ID '+id+' no está registrado. Puedes darlo de alta como bien nuevo:');
-    el('formSqNuevo').classList.remove('oculto');
-    el('sqArea').value=perfil.area_id;
+    el('formSqNuevo').classList.remove('oculto'); el('sqArea').value=perfil.area_id;
     return;
   }
-  sqBien=b;
-  banner('bannerSq',null);
-  el('fichaSq').innerHTML=`<b>${b.descripcion}</b><br>
-    ${[b.marca,b.modelo].filter(Boolean).join(' ')||''}
-    ${b.resguardante?'<br>Resguardante: <b>'+b.resguardante+'</b>':''}
-    ${b.ubicacion?'<br>Ubicación: '+b.ubicacion:''}`;
-  el('fichaSq').classList.remove('oculto');
-  el('btnVerifSq').classList.remove('oculto');
+  bienActivo=b; banner('bannerSq',null);
+  el('fichaSq').innerHTML=fichaHTML(b);
+  el('btnVerifSq').classList.remove('oculto'); el('btnCorrSq').classList.remove('oculto');
 }
 async function verificarSinQR(){
-  if(!sqBien) return;
-  await verificarBien(sqBien);
-  el('sqId').value=''; el('fichaSq').classList.add('oculto'); el('btnVerifSq').classList.add('oculto');
-  sqBien=null;
+  if(!bienActivo) return;
+  await verificarBien(bienActivo);
 }
 async function registrarSinQR(){
   const idInv=el('sqId').value.trim(), desc=el('sqDesc').value.trim();
@@ -641,182 +666,371 @@ async function registrarSinQR(){
   const {data:b,error}=await sb.from('bienes').insert({
     id_inventario:idInv, descripcion:desc.toUpperCase(), area_id,
     ubicacion:ubi||null, creado_por:usuario.id, origen:'campo'
-  }).select('id,descripcion,id_inventario').single();
+  }).select('*').single();
   if(error){
     if(error.code==='23505') return flash('dup','Duplicado','Ese número de inventario ya existe.');
     return toast("Error: "+error.message);
   }
   el('sqDesc').value=''; el('sqUbi').value=''; el('formSqNuevo').classList.add('oculto');
   banner('bannerSq',null); el('sqId').value='';
-  if(campSel()) await verificarBien(b);
+  const camp=campSel();
+  if(camp) abrirCamara(b, camp);
   else flash('ok','Bien registrado',`${b.descripcion} · ID ${b.id_inventario}`);
 }
 
-/* ================= FOTO DE EVIDENCIA OBLIGATORIA ================= */
-function tomarEvidencia(){
-  clearTimeout(flashTimer);
-  el('evidInput').click();
+/* ================= FICHA DE DATOS ================= */
+function fila(k,v){ return v==null||v===''?'':`<div class="row"><span class="k">${k}</span><span class="v">${esc(v)}</span></div>`; }
+function fichaHTML(b){
+  return '<div class="ficha">'+
+    fila('ID', b.id_inventario)+ fila('No. inventario', b.no_inventario)+
+    fila('Descripción', b.descripcion)+ fila('Marca', b.marca)+ fila('Modelo', b.modelo)+
+    fila('No. serie', b.no_serie)+ fila('Resguardante', b.resguardante)+
+    fila('Ubicación', b.ubicacion)+ fila('Estado', b.estado_bien)+
+    fila('Valor', b.valor!=null?('$'+Number(b.valor).toLocaleString('es-MX')):'')+
+    fila('QR ligado', b.qr_payload||'—')+'</div>';
 }
-async function subirEvidencia(inp){
-  const f=inp.files[0]; inp.value='';
-  if(!f || !pendFoto) return;
-  const {bien,camp}=pendFoto;
-  toast("Subiendo foto de evidencia…");
-  const url=await subirFoto(f, 'evid_'+camp+'_'+(bien.id_inventario||'sn'));
-  if(!url){ toast("La foto no se pudo subir. Revisa tu señal e inténtalo de nuevo.",4000); return; } // pendFoto se conserva para reintentar
-  const {error}=await sb.from('verificaciones')
-    .insert({campania_id:camp, bien_id:bien.id, usuario:usuario.id, foto_url:url});
-  pendFoto=null;
-  if(error){
-    if(error.code==='23505'){ beep(440); flash('dup','Ya verificado',`${bien.descripcion} · ID ${bien.id_inventario||'s/n'}`); }
-    else { toast("Error: "+error.message); cerrarFlash(); }
-    return;
+
+/* ================= CORRECCIÓN NO DESTRUCTIVA ================= */
+const CAMPOS_CORR=[['descripcion','Descripción'],['marca','Marca'],['modelo','Modelo'],
+  ['no_serie','No. serie'],['resguardante','Resguardante'],['ubicacion','Ubicación'],
+  ['estado_bien','Estado del bien'],['valor','Valor']];
+function abrirCorreccion(){
+  if(!bienActivo) return;
+  const b=bienActivo;
+  let h='<div class="card" style="margin-top:12px;border:2px solid var(--dorado)">'+
+    '<h2>Corregir datos · no altera el original</h2>'+
+    '<p class="aviso" style="margin-top:0">El catálogo original se conserva intacto. Tu corrección '+
+    'se guarda aparte y queda pendiente de revisión de un administrador.</p>';
+  CAMPOS_CORR.forEach(([k,lbl])=>{
+    const val=b[k]==null?'':b[k];
+    const tipo=k==='valor'?'inputmode="decimal"':'';
+    h+=`<label>${lbl}</label><input id="corr_${k}" ${tipo} value="${esc(val)}">`;
+  });
+  h+='<label>Nota / motivo (opcional)</label><textarea id="corr_nota" rows="2" placeholder="ej. el resguardante cambió, el equipo ya no sirve…"></textarea>'+
+     '<button class="btn btn-p" onclick="guardarCorreccion()">Enviar corrección</button>'+
+     '<button class="btn btn-g" onclick="cerrarCorreccion()">Cancelar</button></div>';
+  const cont=document.createElement('div'); cont.id='corrWrap'; cont.innerHTML=h;
+  cerrarCorreccion();
+  (el('tabScan').classList.contains('oculto')?el('tabSinqr'):el('tabScan')).appendChild(cont);
+  cont.scrollIntoView({behavior:'smooth'});
+}
+function cerrarCorreccion(){ const w=el('corrWrap'); if(w) w.remove(); }
+/* Convierte "$1,234.56" / "1234.5" / "1.234,56" a número; '' o inválido → null */
+function parseValor(s){
+  s=String(s==null?'':s).trim();
+  if(!s) return null;
+  s=s.replace(/[^\d.,]/g,'');
+  if(s.indexOf(',')>-1 && s.indexOf('.')>-1) s=s.replace(/,/g,'');        // 1,234.56 → 1234.56
+  else if(s.indexOf(',')>-1) s=s.replace(/,/g,'');                        // 1,234 → 1234 (coma = miles)
+  const n=Number(s);
+  return isNaN(n)?null:n;
+}
+async function guardarCorreccion(){
+  const b=bienActivo; if(!b) return;
+  const cambios={}; let valorInvalido=false;
+  CAMPOS_CORR.forEach(([k])=>{
+    const raw=el('corr_'+k).value.trim();
+    if(k==='valor'){
+      const nuevoN=parseValor(raw), origN=(b.valor==null?null:Number(b.valor));
+      if(raw!=='' && nuevoN===null) valorInvalido=true;
+      if((nuevoN===null?null:+nuevoN) !== (origN===null?null:+origN))
+        cambios.valor={antes:b.valor, despues:nuevoN};
+    }else{
+      const orig=b[k]==null?'':String(b[k]);
+      if(raw!==orig) cambios[k]={antes:b[k], despues:raw};
+    }
+  });
+  if(valorInvalido) return toast("El valor no es un número válido (ej. 1234.50).");
+  if(!Object.keys(cambios).length) return toast("No cambiaste ningún dato.");
+  const {error}=await sb.from('correcciones').insert({
+    bien_id:b.id, campania_id:campSel(), cambios, nota:el('corr_nota').value.trim()||null, usuario:usuario.id
+  });
+  if(error) return toast("Error: "+error.message);
+  cerrarCorreccion();
+  flash('ok','Corrección enviada','Se guardó aparte, sin tocar el catálogo original. Un administrador la revisará.');
+}
+
+/* ================= CÁMARA DE EVIDENCIA (foto en vivo + GPS + hora) ================= */
+async function abrirCamara(bien, camp){
+  detenerEscaneo(); cerrarCorreccion();
+  if(watchId!=null && navigator.geolocation){ navigator.geolocation.clearWatch(watchId); watchId=null; }
+  evid={bien, camp, fotos:[], gps:null};
+  el('camBien').textContent=(bien.descripcion||'')+' · ID '+(bien.id_inventario||'s/n');
+  el('camThumbs').innerHTML=''; el('btnAsentar').disabled=true;
+  el('btnAsentar').textContent='Asentar verificación';
+  el('camHint').textContent='Toma al menos una foto del bien.';
+  el('camEvid').style.display='flex';
+  // GPS en vivo
+  el('camGps').textContent='📍 Obteniendo ubicación…';
+  if(navigator.geolocation){
+    watchId=navigator.geolocation.watchPosition(
+      p=>{ evid.gps={lat:p.coords.latitude, lng:p.coords.longitude, prec:p.coords.accuracy};
+           el('camGps').textContent=`📍 ${p.coords.latitude.toFixed(5)}, ${p.coords.longitude.toFixed(5)}  (±${Math.round(p.coords.accuracy)} m)`; },
+      e=>{ el('camGps').textContent='📍 GPS no disponible ('+(e.message||'sin señal')+') — la foto se guardará sin coordenadas'; },
+      {enableHighAccuracy:true, maximumAge:5000, timeout:15000});
+  } else el('camGps').textContent='📍 Este equipo no reporta GPS';
+  // Cámara
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({
+      video:{ facingMode:{ideal:'environment'}, width:{ideal:1920}, height:{ideal:1080} }, audio:false });
+    el('camVid').srcObject=stream; await el('camVid').play();
+    evid.track=stream.getVideoTracks()[0];
+    try{ await evid.track.applyConstraints({advanced:[{focusMode:'continuous'}]}); }catch(e){}
+  }catch(e){ toast("No se pudo abrir la cámara: "+(e.message||e)+". Revisa el permiso de cámara del navegador.",5000); cerrarCamara(false); }
+}
+function cerrarCamara(cancelado){
+  if(watchId!=null && navigator.geolocation){ navigator.geolocation.clearWatch(watchId); watchId=null; }
+  if(el('camVid').srcObject){ el('camVid').srcObject.getTracks().forEach(t=>t.stop()); el('camVid').srcObject=null; }
+  if(evid){ evid.fotos.forEach(f=>{ try{URL.revokeObjectURL(f.url);}catch(e){} }); }
+  el('camEvid').style.display='none';
+  const habiaFotos = cancelado && evid && evid.fotos.length>0;
+  if(habiaFotos){ toast("Verificación cancelada: sin asentar, las fotos no se registran.",3500); }
+  evid=null;
+}
+function capturarFoto(){
+  if(!evid || !el('camVid').videoWidth) return;
+  const v=el('camVid'), c=el('capCanvas');
+  const max=1280, escf=Math.min(1, max/Math.max(v.videoWidth,v.videoHeight));
+  c.width=Math.round(v.videoWidth*escf); c.height=Math.round(v.videoHeight*escf);
+  const ctx=c.getContext('2d');
+  ctx.drawImage(v,0,0,c.width,c.height);
+  // Sello: fecha/hora + GPS + ID (queda impreso en la foto = evidencia autodescriptiva)
+  const ahora=new Date();
+  const l1=ahora.toLocaleString('es-MX',{dateStyle:'medium',timeStyle:'medium'});
+  const l2=evid.gps?`GPS ${evid.gps.lat.toFixed(5)}, ${evid.gps.lng.toFixed(5)} (±${Math.round(evid.gps.prec)}m)`:'GPS no disponible';
+  const l3=`ID ${evid.bien.id_inventario||'s/n'} · ${(evid.bien.descripcion||'').slice(0,34)}`;
+  const fs=Math.max(13, Math.round(c.width/38)), pad=Math.round(fs*0.5), bh=fs*3+pad*3.2;
+  ctx.fillStyle='rgba(0,0,0,.62)'; ctx.fillRect(0, c.height-bh, c.width, bh);
+  ctx.fillStyle='#fff'; ctx.font=`bold ${fs}px -apple-system,Roboto,sans-serif`; ctx.textBaseline='top';
+  ctx.fillText(l1, pad, c.height-bh+pad);
+  ctx.fillText(l2, pad, c.height-bh+pad*1.9+fs);
+  ctx.fillStyle=evid.gps?'#e6d194':'#ffb3b3';
+  ctx.fillText(l3, pad, c.height-bh+pad*2.8+fs*2);
+  c.toBlob(blob=>{
+    const item={blob, url:URL.createObjectURL(blob),
+      tomada_en:ahora.toISOString(),
+      lat:evid.gps?evid.gps.lat:null, lng:evid.gps?evid.gps.lng:null, prec:evid.gps?evid.gps.prec:null};
+    evid.fotos.push(item);
+    const img=document.createElement('img'); img.src=item.url; img.title='Tocar para quitar';
+    img.onclick=()=>{ const i=evid.fotos.indexOf(item);
+      if(i>=0){ try{URL.revokeObjectURL(item.url);}catch(e){} evid.fotos.splice(i,1); img.remove(); refrescarCam(); } };
+    el('camThumbs').appendChild(img);
+    beep(1200,.08); refrescarCam();
+  },'image/jpeg',.72);
+}
+function refrescarCam(){
+  const n=evid?evid.fotos.length:0;
+  el('btnAsentar').disabled = n<1;
+  el('btnAsentar').textContent = n<1?'Asentar verificación':`Asentar verificación (${n} foto${n>1?'s':''})`;
+  el('camHint').textContent = n<1?'Toma al menos una foto del bien.':`${n} foto${n>1?'s':''} lista${n>1?'s':''}. Puedes tomar otro ángulo.`;
+}
+async function toggleTorchEvid(){
+  if(!evid||!evid.track) return;
+  try{ evid._t=!evid._t; await evid.track.applyConstraints({advanced:[{torch:evid._t}]}); }
+  catch(e){ toast("La linterna no está disponible."); }
+}
+async function subirBlob(blob,prefijo){
+  const ruta=`${prefijo}_${Date.now()}_${Math.round(Math.random()*1e6)}.jpg`.replace(/[^a-zA-Z0-9_.]/g,'_');
+  const {error}=await sb.storage.from('fotos').upload(ruta,blob,{contentType:'image/jpeg'});
+  if(error){ return null; }
+  return {url:sb.storage.from('fotos').getPublicUrl(ruta).data.publicUrl, path:ruta};
+}
+async function asentarVerificacion(){
+  if(!evid || evid.fotos.length<1) return;
+  const {bien,camp,fotos}=evid;
+  el('btnAsentar').disabled=true; toast("Subiendo "+fotos.length+" foto(s)…",6000);
+  // Subir cada foto UNA sola vez (se cachea en la foto para que un reintento no re-suba).
+  for(const f of fotos){
+    if(!f.url_subida){
+      const up=await subirBlob(f.blob, 'evid_'+camp+'_'+(bien.id_inventario||'sn'));
+      if(!up){ toast("Falló la subida de una foto. Revisa tu señal y toca Asentar de nuevo.",4000); el('btnAsentar').disabled=false; return; }
+      f.url_subida=up.url; f.path=up.path;
+    }
   }
-  beep(1046);
-  flash('ok','✓ Verificado',`${bien.descripcion} · ID ${bien.id_inventario||'s/n'}`);
+  const payload=fotos.map(f=>({foto_url:f.url_subida, lat:f.lat, lng:f.lng, precision_m:f.prec, tomada_en:f.tomada_en}));
+  const {error}=await sb.rpc('registrar_verificacion',{p_campania:camp, p_bien:bien.id, p_evidencias:payload});
+  if(error){
+    if(String(error.code)==='23505' || /duplicate|unique/i.test(error.message||'')){
+      // Ya estaba verificado: las fotos que acabamos de subir quedan huérfanas → borrarlas.
+      try{ await sb.storage.from('fotos').remove(fotos.map(f=>f.path).filter(Boolean)); }catch(e){}
+      cerrarCamara(false); beep(440); flash('dup','Ya verificado',`${bien.descripcion} · ID ${bien.id_inventario||'s/n'}`); return;
+    }
+    el('btnAsentar').disabled=false; return toast("Error al asentar: "+error.message+" (las fotos ya subidas se reusarán al reintentar).",6000);
+  }
+  cerrarCamara(false); beep(1046);
+  flash('ok','✓ Verificado',`${bien.descripcion} · ID ${bien.id_inventario||'s/n'} · ${fotos.length} foto(s)`);
 }
 
 /* ================= LECTOR DEL NÚMERO VISIBLE (OCR) ================= */
 let ocrTarget=null, ocrWorker=null;
 function escanearID(campo){ ocrTarget=campo; el('ocrInput').click(); }
-
-/* Carga el motor de OCR solo la primera vez que se usa */
 async function cargarOCR(){
   if(ocrWorker) return ocrWorker;
   if(!window.Tesseract){
     toast("Descargando el lector de números (solo la primera vez)…",5000);
-    await new Promise((res,rej)=>{
-      const s=document.createElement('script');
+    await new Promise((res,rej)=>{ const s=document.createElement('script');
       s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
       s.onload=res; s.onerror=()=>rej(new Error("sin conexión para descargar el lector"));
-      document.head.appendChild(s);
-    });
+      document.head.appendChild(s); });
   }
   ocrWorker=await Tesseract.createWorker('eng');
   await ocrWorker.setParameters({tessedit_char_whitelist:'0123456789ID:'});
   return ocrWorker;
 }
-
-/* Prepara la foto para el OCR: gris, contraste alto, buena resolución */
 function comprimirOCR(file){
-  return new Promise(res=>{
-    const img=new Image();
-    img.onload=()=>{
-      const max=1600, esc=Math.min(1, max/Math.max(img.width,img.height));
-      const c=document.createElement('canvas');
-      c.width=img.width*esc; c.height=img.height*esc;
-      const ctx=c.getContext('2d');
-      ctx.filter='grayscale(1) contrast(1.4)';
-      ctx.drawImage(img,0,0,c.width,c.height);
-      c.toBlob(b=>res(b),'image/jpeg',.85);
-    };
-    img.src=URL.createObjectURL(file);
-  });
+  return new Promise(res=>{ const img=new Image();
+    img.onload=()=>{ const max=1600, e=Math.min(1,max/Math.max(img.width,img.height));
+      const c=document.createElement('canvas'); c.width=img.width*e; c.height=img.height*e;
+      const ctx=c.getContext('2d'); ctx.filter='grayscale(1) contrast(1.4)';
+      ctx.drawImage(img,0,0,c.width,c.height); c.toBlob(b=>res(b),'image/jpeg',.85); };
+    img.src=URL.createObjectURL(file); });
 }
-
 async function leerIDdeFoto(inp){
   const f=inp.files[0]; inp.value='';
   if(!f || !ocrTarget) return;
   toast("Leyendo el número de la etiqueta…",8000);
   let texto="";
-  try{
-    const w=await cargarOCR();
-    const blob=await comprimirOCR(f);
-    const {data}=await w.recognize(blob);
-    texto=data.text||"";
-  }catch(e){ toast("No se pudo usar el lector: "+(e.message||e),4000); return; }
+  try{ const w=await cargarOCR(); const blob=await comprimirOCR(f); const {data}=await w.recognize(blob); texto=data.text||""; }
+  catch(e){ return toast("No se pudo usar el lector: "+(e.message||e),4000); }
   const nums=[...new Set(texto.match(/\d{3,7}/g)||[])];
-  if(!nums.length){
-    toast("No se distinguió ningún número. Acércate a la etiqueta, evita el reflejo y reintenta.",4000);
-    return;
-  }
-  // Se validan los candidatos contra el catálogo: gana el que exista
-  const {data:enCat}=await sb.from('bienes')
-    .select('id_inventario,descripcion').in('id_inventario',nums);
+  if(!nums.length) return toast("No se distinguió ningún número. Acércate, evita el reflejo y reintenta.",4000);
+  const {data:enCat}=await sb.from('bienes').select('id_inventario,descripcion').in('id_inventario',nums);
   const hits=enCat||[];
   if(hits.length===1){ aplicarID(ocrTarget,hits[0].id_inventario); }
   else if(hits.length>1){ elegirEntre(ocrTarget,hits); }
-  else if(nums.length===1){
-    aplicarID(ocrTarget,nums[0]);
-    toast("Número leído: "+nums[0]+" (no está en el catálogo; revísalo antes de guardar)",4000);
-  }
+  else if(nums.length===1){ aplicarID(ocrTarget,nums[0]); toast("Número leído: "+nums[0]+" (no está en catálogo; revísalo)",4000); }
   else{ elegirEntre(ocrTarget, nums.map(n=>({id_inventario:n,descripcion:null}))); }
 }
-function aplicarID(campo,val){
-  el(campo).value=val;
-  beep(1046);
-  if(campo==='fId') buscarCatalogo(); else buscarSinQR();
-}
+function aplicarID(campo,val){ el(campo).value=val; beep(1046); if(campo==='fId') buscarCatalogo(); else buscarSinQR(); }
 function elegirEntre(campo,ops){
   const b=el(campo==='fId'?'bannerCat':'bannerSq');
   b.innerHTML='Se leyeron varios números; toca el de la etiqueta:<br>'+
-    ops.map(o=>`<button class="mini" style="flex:none;margin:6px 6px 0 0"
-      onclick="aplicarID('${campo}','${o.id_inventario}')">${o.id_inventario}${o.descripcion?' · '+String(o.descripcion).slice(0,26):''}</button>`).join('');
+    ops.map(o=>`<button class="mini" style="flex:none;margin:6px 6px 0 0" onclick="aplicarID('${campo}','${o.id_inventario}')">${o.id_inventario}${o.descripcion?' · '+esc(String(o.descripcion).slice(0,26)):''}</button>`).join('');
   b.classList.remove('oculto');
 }
 
 /* ================= CAMPAÑAS ================= */
 async function cargarCampanias(){
   const {data}=await sb.from('campanias').select('*').eq('activa',true).order('id',{ascending:false});
-  el('selCampania').innerHTML=(data||[]).map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('')
+  el('selCampania').innerHTML=(data||[]).map(c=>`<option value="${c.id}">${esc(c.nombre)}</option>`).join('')
     || '<option value="">— sin campañas activas —</option>';
+}
+async function cargarCampaniasExport(){
+  const {data}=await sb.from('campanias').select('*').order('id',{ascending:false});
+  el('expCampania').innerHTML=(data||[]).map(c=>`<option value="${c.id}">${esc(c.nombre)}${c.activa?' (activa)':''}</option>`).join('')
+    || '<option value="">— sin campañas —</option>';
+}
+
+/* ================= EXPORTAR A EXCEL ================= */
+async function cargarSheetJS(){
+  if(window.XLSX) return;
+  toast("Preparando el exportador…",4000);
+  await new Promise((res,rej)=>{ const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+    s.onload=res; s.onerror=()=>rej(new Error("sin conexión")); document.head.appendChild(s); });
+}
+async function exportarExcel(){
+  const camp=+el('expCampania').value||null;
+  const areaF=el('expArea').value?+el('expArea').value:null;
+  const estadoF=el('expEstado').value;
+  try{ await cargarSheetJS(); }catch(e){ return toast("No se pudo cargar el exportador (revisa tu conexión)."); }
+  toast("Generando Excel…",6000);
+
+  let q=sb.from('bienes').select('*').limit(20000);
+  if(areaF) q=q.eq('area_id',areaF);
+  const {data:bienes}=await q;
+  const mapArea={}; areas.forEach(a=>mapArea[a.id]=a.nombre);
+
+  // Verificaciones de la campaña + perfiles + evidencias (conteo y primer GPS)
+  let verifMap={};
+  if(camp){
+    const {data:vs}=await sb.from('verificaciones').select('id,bien_id,usuario,verificado_en').eq('campania_id',camp).limit(20000);
+    const {data:perfs}=await sb.from('perfiles').select('id,nombre');
+    const nombreDe={}; (perfs||[]).forEach(p=>nombreDe[p.id]=p.nombre);
+    const vids=(vs||[]).map(v=>v.id);
+    let evPorVerif={};
+    if(vids.length){
+      const {data:evs}=await sb.from('evidencias').select('verificacion_id,lat,lng').in('verificacion_id',vids).limit(50000);
+      (evs||[]).forEach(e=>{ (evPorVerif[e.verificacion_id]=evPorVerif[e.verificacion_id]||[]).push(e); });
+    }
+    (vs||[]).forEach(v=>{
+      const evl=evPorVerif[v.id]||[]; const g=evl.find(x=>x.lat!=null);
+      verifMap[v.bien_id]={por:nombreDe[v.usuario]||'—', cuando:v.verificado_en, fotos:evl.length,
+        lat:g?g.lat:'', lng:g?g.lng:''};
+    });
+  }
+  // Correcciones pendientes por bien
+  const {data:corr}=await sb.from('correcciones').select('bien_id').eq('estado','pendiente').limit(20000);
+  const conCorr=new Set((corr||[]).map(c=>c.bien_id));
+
+  const filas=[];
+  (bienes||[]).forEach(b=>{
+    const v=verifMap[b.id];
+    const verificado=!!v;
+    if(estadoF==='verif' && !verificado) return;
+    if(estadoF==='pend' && verificado) return;
+    filas.push({
+      'Área': mapArea[b.area_id]||'', 'ID': b.id_inventario||'', 'No. Inventario': b.no_inventario||'',
+      'Descripción': b.descripcion||'', 'Marca': b.marca||'', 'Modelo': b.modelo||'',
+      'No. Serie': b.no_serie||'', 'Resguardante': b.resguardante||'', 'Estado bien': b.estado_bien||'',
+      'Valor': b.valor!=null?Number(b.valor):'', 'QR ligado': b.qr_payload||'',
+      'Verificación': verificado?'VERIFICADO':'NO VERIFICADO',
+      'Fecha verificación': v?new Date(v.cuando).toLocaleString('es-MX'):'',
+      'Verificado por': v?v.por:'', 'Fotos': v?v.fotos:'', 'Lat': v?v.lat:'', 'Lng': v?v.lng:'',
+      'Corrección pendiente': conCorr.has(b.id)?'SÍ':''
+    });
+  });
+  if(!filas.length) return toast("No hay bienes que cumplan ese filtro.");
+  const ws=XLSX.utils.json_to_sheet(filas);
+  const wb=XLSX.utils.book_new();
+  const nombreArea=areaF?(mapArea[areaF]||'area').slice(0,20):'Todas';
+  XLSX.utils.book_append_sheet(wb, ws, 'Bienes');
+  const et={todos:'',verif:'_verificados',pend:'_faltantes'}[estadoF];
+  const fecha=new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `Inventario_${nombreArea}${et}_${fecha}.xlsx`.replace(/\s+/g,'_'));
+  toast("✓ Excel descargado ("+filas.length+" bienes).",4000);
 }
 
 /* ================= FLASH ================= */
 let flashTimer=null;
-function flash(tipo,titulo,detalle,conFoto){
+function flash(tipo,titulo,detalle){
   const f=el('flash');
   f.className=tipo; f.style.display='flex';
-  el('flashSim').textContent = tipo==='ok'?'✓' : tipo==='dup'?'↺' : tipo==='foto'?'📸' : '✕';
+  el('flashSim').textContent = tipo==='ok'?'✓' : tipo==='dup'?'↺' : '✕';
   el('flashTit').textContent=titulo;
   el('flashDet').textContent=detalle||'';
-  el('flashFoto').classList.toggle('oculto', !conFoto);
-  document.querySelector('#flash .cerrar').textContent = tipo==='foto' ? 'Cancelar' : 'Continuar';
   clearTimeout(flashTimer);
-  // el aviso de foto obligatoria NUNCA se cierra solo; los demás sí en modo continuo
-  if(escaneando && tipo!=='foto') flashTimer=setTimeout(cerrarFlash, 2000);
+  // "Ya verificado" no bloquea el escaneo continuo: se cierra solo
+  if(tipo==='dup' && escaneando) flashTimer=setTimeout(cerrarFlash, 1800);
 }
-function cerrarFlash(){
-  el('flash').style.display='none';
-  el('flashFoto').classList.add('oculto');
-  if(pendFoto){ pendFoto=null; toast("Verificación cancelada: sin foto de evidencia no se registra.",3500); }
-}
+function cerrarFlash(){ el('flash').style.display='none'; }
 
 /* ================= RESUMEN ================= */
 async function cargarResumen(){
-  const {data:camps}=await sb.from('campanias').select('id,nombre').eq('activa',true).order('id',{ascending:false}).limit(1);
-  const camp=camps&&camps[0];
-  const {data:bienes}=await sb.from('bienes').select('id,area_id,id_inventario,descripcion,ubicacion').limit(10000);
+  // Usa la campaña seleccionada para escanear; si no hay, la última activa.
+  let camp=null; const cid=campSel();
+  if(cid){ const {data}=await sb.from('campanias').select('id,nombre').eq('id',cid).maybeSingle(); camp=data; }
+  if(!camp){ const {data:camps}=await sb.from('campanias').select('id,nombre').eq('activa',true).order('id',{ascending:false}).limit(1); camp=camps&&camps[0]; }
+  const {data:bienes}=await sb.from('bienes').select('id,area_id,id_inventario,descripcion,ubicacion').limit(20000);
   let verifSet=new Set();
   if(camp){
-    const {data:v}=await sb.from('verificaciones').select('bien_id').eq('campania_id',camp.id).limit(10000);
+    const {data:v}=await sb.from('verificaciones').select('bien_id').eq('campania_id',camp.id).limit(20000);
     (v||[]).forEach(x=>verifSet.add(x.bien_id));
   }
   const porArea={};
-  (bienes||[]).forEach(b=>{
-    porArea[b.area_id]=porArea[b.area_id]||{t:0,v:0};
-    porArea[b.area_id].t++;
-    if(verifSet.has(b.id)) porArea[b.area_id].v++;
-  });
-  let html=`<div class="aviso" style="margin-bottom:8px">Campaña: <span class="pill">${camp?camp.nombre:'ninguna activa'}</span></div>`;
+  (bienes||[]).forEach(b=>{ porArea[b.area_id]=porArea[b.area_id]||{t:0,v:0}; porArea[b.area_id].t++; if(verifSet.has(b.id)) porArea[b.area_id].v++; });
+  let html=`<div class="aviso" style="margin-bottom:8px">Campaña: <span class="pill">${camp?esc(camp.nombre):'ninguna activa'}</span></div>`;
   html+='<table><tr><th>Área</th><th style="text-align:right">Bienes</th><th style="text-align:right">Verif.</th><th style="text-align:right">%</th></tr>';
-  areas.forEach(a=>{
-    const d=porArea[a.id]||{t:0,v:0};
-    const pct=d.t? Math.round(100*d.v/d.t):0;
-    html+=`<tr><td>${a.nombre}</td><td class="num">${d.t}</td><td class="num">${d.v}</td>
-      <td class="num ${pct>=90?'pct-ok':'pct-mal'}">${pct}%</td></tr>`;
-  });
-  html+='</table>';
-  el('resumenTabla').innerHTML=html;
-
+  areas.forEach(a=>{ const d=porArea[a.id]||{t:0,v:0}; const pct=d.t?Math.round(100*d.v/d.t):0;
+    html+=`<tr><td>${esc(a.nombre)}</td><td class="num">${d.t}</td><td class="num">${d.v}</td><td class="num ${pct>=90?'pct-ok':'pct-mal'}">${pct}%</td></tr>`; });
+  html+='</table>'; el('resumenTabla').innerHTML=html;
   const falt=(bienes||[]).filter(b=>b.area_id===perfil.area_id && !verifSet.has(b.id));
   if(!camp) el('faltantesTabla').innerHTML='<p class="aviso">Sin campaña activa.</p>';
   else if(!falt.length) el('faltantesTabla').innerHTML='<p class="aviso" style="color:var(--verde);font-weight:700">✓ Todo verificado en tu área.</p>';
   else{
     let h='<table><tr><th>ID</th><th>Descripción</th><th>Ubicación</th></tr>';
-    falt.slice(0,200).forEach(b=>h+=`<tr><td class="num">${b.id_inventario||'s/n'}</td><td>${b.descripcion}</td><td>${b.ubicacion||'—'}</td></tr>`);
-    h+='</table>';
-    if(falt.length>200) h+=`<p class="aviso">…y ${falt.length-200} más.</p>`;
+    falt.slice(0,200).forEach(b=>h+=`<tr><td class="num">${esc(b.id_inventario||'s/n')}</td><td>${esc(b.descripcion)}</td><td>${esc(b.ubicacion||'—')}</td></tr>`);
+    h+='</table>'; if(falt.length>200) h+=`<p class="aviso">…y ${falt.length-200} más.</p>`;
     el('faltantesTabla').innerHTML=h;
   }
 }
